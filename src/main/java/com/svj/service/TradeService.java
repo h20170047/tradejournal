@@ -1,8 +1,8 @@
 package com.svj.service;
 
-import com.svj.entity.TradeEntry;
 import com.svj.dto.TradeEntryRequestDTO;
 import com.svj.dto.TradeEntryResponseDTO;
+import com.svj.entity.TradeEntry;
 import com.svj.exceptionHandling.TradeProcessException;
 import com.svj.repository.TradeRepository;
 import com.svj.utilities.EntityDTOConverter;
@@ -10,12 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.svj.utilities.EntityDTOConverter.*;
@@ -34,6 +31,7 @@ public class TradeService {
         try{
             log.info("TradeService: addEntry Starting method.");
             TradeEntry tradeEntry = convertDTOToEntity(requestDTO);
+            calculateProfit(tradeEntry);
             TradeEntry savedEntry = tradeRepository.save(tradeEntry);
             log.debug("TradeService: addEntry Response from db is {}", savedEntry);
             log.info("TradeService: addEntry method ended.");
@@ -44,12 +42,19 @@ public class TradeService {
         }
     }
 
+    private void calculateProfit(TradeEntry tradeEntry) {
+        if(tradeEntry.getSellPrice()>0 && tradeEntry.getBuyPrice()> 0){
+            tradeEntry.setProfit( (tradeEntry.getSellPrice()- tradeEntry.getBuyPrice())/ tradeEntry.getBuyPrice()*100 );
+        }
+    }
+
     public TradeEntryResponseDTO updateEntry(String id, TradeEntryRequestDTO requestDTO){
         try{
             log.info("TradeService: updateEntry Starting method.");
             TradeEntry dbEntry= tradeRepository.findById(id).orElseThrow(()->  new TradeProcessException("Unable to find the requested trade entry"));
             log.debug("Retrieved entry from db is {}", dbEntry);
             copyReqToEntity(requestDTO, dbEntry);
+            calculateProfit(dbEntry);
             TradeEntry savedEntry = tradeRepository.save(dbEntry);
             log.debug("TradeService: updateEntry Updated entry from db is {}", savedEntry);
             log.info("TradeService: updateEntry method ended.");

@@ -1,7 +1,6 @@
 package com.svj.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.svj.dto.ErrorDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

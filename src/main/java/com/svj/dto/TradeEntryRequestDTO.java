@@ -21,9 +21,9 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TradeEntryRequestDTO {
     private String symbol;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern="dd-MM-yyyy[ [HH][:mm][:ss][.SSS]]")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern="d-M-yyyy[ [H][:m][:s][.S]]")
     private LocalDateTime buy;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern="dd-MM-yyyy[ [HH][:mm][:ss][.SSS]]")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern="d-M-yyyy[ [H][:m][:s][.S]]")
     private LocalDateTime sell;
     @DecimalMin("0.0")
     private double stopLoss;
