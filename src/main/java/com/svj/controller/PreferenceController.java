@@ -1,37 +1,35 @@
 package com.svj.controller;
 
+import com.svj.dto.PreferenceRequestDTO;
+import com.svj.dto.PreferenceResponseDTO;
 import com.svj.dto.ServiceResponse;
-import com.svj.dto.TradeEntryRequestDTO;
-import com.svj.dto.TradeEntryResponseDTO;
-import com.svj.service.JournalService;
+import com.svj.service.PreferenceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.List;
 
-import static com.svj.utilities.AppUtils.dateFormatter;
 import static com.svj.utilities.JsonParser.jsonToString;
 
 @RestController
-@RequestMapping("/trade-journal")
+@RequestMapping("/preference")
 @Slf4j
-public class JournalController {
+public class PreferenceController {
 
-    private JournalService journalService;
+    private PreferenceService preferenceService;
 
     @Autowired
-    public JournalController(JournalService service){
-        journalService = service;
+    public PreferenceController(PreferenceService service){
+        preferenceService = service;
     }
 
     @PostMapping
-    public ServiceResponse addEntry(@RequestBody @Valid TradeEntryRequestDTO requestDTO){
+    public ServiceResponse addEntry(@RequestBody @Valid PreferenceRequestDTO requestDTO){
         log.info("JournalController: addEntry Starting method with payload {}", jsonToString(requestDTO));
-        TradeEntryResponseDTO responseDTO = journalService.addEntry(requestDTO);
+        PreferenceResponseDTO responseDTO = preferenceService.addEntry(requestDTO);
         log.debug("JournalController: addEntry Response from service is {}", jsonToString(responseDTO));
         ServiceResponse response= new ServiceResponse(HttpStatus.CREATED, responseDTO, null);
         log.info("JournalController: addEntry Method returning with {} ", response);
@@ -39,9 +37,9 @@ public class JournalController {
     }
 
     @PutMapping("/{id}")
-    public ServiceResponse updateEntry(@PathVariable String id, @RequestBody @Valid TradeEntryRequestDTO requestDTO){
+    public ServiceResponse updateEntry(@PathVariable String id, @RequestBody @Valid PreferenceRequestDTO requestDTO){
         log.info("JournalController: updateEntry Starting method with id- {} and payload- {}", id, jsonToString(requestDTO));
-        TradeEntryResponseDTO responseDTO = journalService.updateEntry(id, requestDTO);
+        PreferenceResponseDTO responseDTO = preferenceService.updateEntry(id, requestDTO);
         log.debug("JournalController: updateEntry Response from service is {}", jsonToString(responseDTO));
         ServiceResponse response= new ServiceResponse(HttpStatus.OK, responseDTO, null);
         log.info("JournalController: updateEntry Method returning with {} ", response);
@@ -51,7 +49,7 @@ public class JournalController {
     @GetMapping("/{id}")
     public ServiceResponse getEntryWithID(@PathVariable String id){
         log.info("JournalController: getEntryWithID Starting method with id- {} ", id);
-        TradeEntryResponseDTO responseDTO = journalService.getEntryByID(id);
+        PreferenceResponseDTO responseDTO = preferenceService.getEntryByID(id);
         log.debug("JournalController: getEntryWithID Response from service is {}", jsonToString(responseDTO));
         ServiceResponse response= new ServiceResponse(HttpStatus.OK, responseDTO, null);
         log.info("JournalController: getEntryWithID Method returning with {}", response);
@@ -62,7 +60,7 @@ public class JournalController {
     @GetMapping()
     public ServiceResponse getAllEntries(){
         log.info("JournalController: getAllEntries Starting method");
-        List<TradeEntryResponseDTO> allEntries = journalService.getAllEntries();
+        List<PreferenceResponseDTO> allEntries = preferenceService.getAllEntries();
         log.debug("JournalController: getEntryWithID Response from service is {}", jsonToString(allEntries));
         ServiceResponse response= new ServiceResponse(HttpStatus.OK, allEntries, null);
         log.info("JournalController: getEntryWithID Method returning with {}", response);
@@ -72,20 +70,20 @@ public class JournalController {
     @DeleteMapping("/{id}")
     public ServiceResponse deleteByID(@PathVariable String id){
         log.info("JournalController: deleteByID Starting method with id- {}", id);
-        String responseStr= journalService.deleteEntry(id);
+        String responseStr= preferenceService.deleteEntry(id);
         log.debug("JournalController: deleteByID Response from service is {}", responseStr);
         ServiceResponse response= new ServiceResponse(HttpStatus.NO_CONTENT, responseStr, null);
         log.info("JournalController: deleteByID Method returning with {}", response);
         return response;
     }
 
-    @GetMapping("/date/{fromDate}/{toDate}")
-    public ServiceResponse getEntriesBetweenDates(@PathVariable String fromDate, @PathVariable String toDate){
-        log.info("JournalController: getEntriesBetweenDates Starting method between dates- {}, {}", fromDate, toDate);
-        List<TradeEntryResponseDTO> allEntries = journalService.getEntriesBetweenDates(LocalDate.parse(fromDate,dateFormatter), LocalDate.parse(toDate,dateFormatter));
-        log.debug("JournalController: getEntriesBetweenDates Response from service is {}", jsonToString(allEntries));
-        ServiceResponse response= new ServiceResponse(HttpStatus.OK, allEntries, null);
-        log.info("JournalController: getEntriesBetweenDates Method returning with {}", response);
+    @GetMapping("/date/{name}")
+    public ServiceResponse getEntriesByName(@PathVariable String name){
+        log.info("JournalController: getEntriesByName Starting method with date- {}", name);
+        PreferenceResponseDTO preference = preferenceService.getEntriesByName(name);
+        log.debug("JournalController: getEntriesByName Response from service is {}", jsonToString(preference));
+        ServiceResponse response= new ServiceResponse(HttpStatus.OK, preference, null);
+        log.info("JournalController: getEntriesByName Method returning with {}", response);
         return response;
     }
 }

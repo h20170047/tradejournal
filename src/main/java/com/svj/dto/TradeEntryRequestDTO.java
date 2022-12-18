@@ -1,36 +1,48 @@
 package com.svj.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.svj.utilities.Constants.POSITION;
+import com.svj.utilities.Constants.PRODUCT;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.Generated;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import sun.awt.image.PixelConverter;
 
-import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder
 public class TradeEntryRequestDTO {
+    @NotBlank
+    private String traderName;
+    private Double capital;
+    @NotBlank
     private String symbol;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern="d-M-yyyy[ [H][:m][:s][.S]]")
-    private LocalDateTime buy;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern="d-M-yyyy[ [H][:m][:s][.S]]")
-    private LocalDateTime sell;
-    @DecimalMin("0.0")
-    private double stopLoss;
-    @DecimalMin("0.0")
-    private double target;
-    private double profit;
-    private double buyPrice;
-    private double sellPrice;
-    private String comments;
+    // provision to override
+    private POSITION position;
+    private PRODUCT product;
+    @NotBlank
+    private int quantity;
+    @NotBlank
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern="d-M-yyyy")
+    private LocalDate entryDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern="d-M-yyyy")
+    private LocalDate exitDate;
+    @NotBlank
+    private Double entryPrice;
+    @NotBlank
+    private double SL;
+    @NotBlank
+    private double T1;
+    private Double T2;
+    private Double exitPrice;
+    private Double profit;
+    private String entryComments;
+    private String exitComments;
+    private String remarks;
 }

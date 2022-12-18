@@ -1,8 +1,13 @@
 package com.svj.utilities;
 
+import com.svj.dto.PreferenceRequestDTO;
+import com.svj.dto.PreferenceResponseDTO;
 import com.svj.entity.TradeEntry;
 import com.svj.dto.TradeEntryRequestDTO;
 import com.svj.dto.TradeEntryResponseDTO;
+import com.svj.entity.TraderPreference;
+
+import java.time.LocalDate;
 
 public class EntityDTOConverter {
 
@@ -10,32 +15,116 @@ public class EntityDTOConverter {
         TradeEntry tradeEntry = new TradeEntry();
         copyReqToEntity(requestDTO, tradeEntry);
         return tradeEntry;
+
     }
 
     public static void copyReqToEntity(TradeEntryRequestDTO requestDTO, TradeEntry tradeEntry) {
+        tradeEntry.setTraderName(requestDTO.getTraderName());
+        tradeEntry.setCapital(requestDTO.getCapital());
         tradeEntry.setSymbol(requestDTO.getSymbol());
-        tradeEntry.setBuy(requestDTO.getBuy());
-        tradeEntry.setSell(requestDTO.getSell());
-        tradeEntry.setStopLoss(requestDTO.getStopLoss());
-        tradeEntry.setTarget(requestDTO.getTarget());
-        tradeEntry.setProfit(requestDTO.getProfit());
-        tradeEntry.setBuyPrice(requestDTO.getBuyPrice());
-        tradeEntry.setSellPrice(requestDTO.getSellPrice());
-        tradeEntry.setComments(requestDTO.getComments());
+        tradeEntry.setQuantity(requestDTO.getQuantity());
+        tradeEntry.setEntryDate(requestDTO.getEntryDate());
+        tradeEntry.setExitDate(requestDTO.getExitDate());
+        tradeEntry.setEntryPrice(requestDTO.getEntryPrice());
+        tradeEntry.setSL(requestDTO.getSL());
+        tradeEntry.setSLPercent(getSLPercent(requestDTO));
+        tradeEntry.setRiskPercent(getRiskPercent(requestDTO));
+        tradeEntry.setT1(requestDTO.getT1());
+        tradeEntry.setT1Percent(getT1Percent(requestDTO));
+        tradeEntry.setT2(requestDTO.getT2());
+        tradeEntry.setT2Percent(getT2Percent(requestDTO));
+        tradeEntry.setExitPrice(requestDTO.getExitPrice());
+        tradeEntry.setProfit(calculateProfit(requestDTO));
+        tradeEntry.setProfitPercent(getProfitPercent(requestDTO));
+        tradeEntry.setEntryComments(requestDTO.getEntryComments());
+        tradeEntry.setExitComments(requestDTO.getExitComments());
+        tradeEntry.setRemarks(requestDTO.getRemarks());
+    }
+
+    // Profit depends on position chosen
+    private static Double calculateProfit(TradeEntryRequestDTO requestDTO) {
+        if(requestDTO.getExitPrice()!= null){
+            if("LONG".equals(requestDTO.getPosition()))
+                return requestDTO.getExitPrice()- requestDTO.getEntryPrice();
+            else
+                return requestDTO.getEntryPrice()- requestDTO.getExitPrice();
+        }
+        return null;
+    }
+
+    private static Double getProfitPercent(TradeEntryRequestDTO requestDTO) {
+        if(requestDTO.getProfit()!= null){
+            return requestDTO.getProfit()/requestDTO.getEntryPrice()*100;
+        }
+        return null;
+    }
+
+    private static Double getT2Percent(TradeEntryRequestDTO requestDTO) {
+        if(requestDTO.getT2()== null)
+            return null;
+        else
+            return Math.abs(requestDTO.getT2()-requestDTO.getT1())/requestDTO.getT1()*100;
+    }
+
+    private static double getT1Percent(TradeEntryRequestDTO requestDTO) {
+        return Math.abs(requestDTO.getT1()- requestDTO.getEntryPrice())/requestDTO.getEntryPrice() *100;
+    }
+
+    private static double getRiskPercent(TradeEntryRequestDTO requestDTO) {
+        return 100*requestDTO.getQuantity()*Math.abs(requestDTO.getSL()-requestDTO.getEntryPrice())/requestDTO.getCapital();
+    }
+
+    private static double getSLPercent(TradeEntryRequestDTO requestDTO) {
+        return Math.min(requestDTO.getSL(), requestDTO.getEntryPrice())/Math.max(requestDTO.getSL(), requestDTO.getEntryPrice() )*100;
     }
 
     public static TradeEntryResponseDTO entityToDTO(TradeEntry entry){
         TradeEntryResponseDTO tradeEntryResponseDTO = new TradeEntryResponseDTO();
         tradeEntryResponseDTO.setId(entry.getId());
+        tradeEntryResponseDTO.setTraderName(entry.getTraderName());
+        tradeEntryResponseDTO.setCapital(entry.getCapital());
         tradeEntryResponseDTO.setSymbol(entry.getSymbol());
-        tradeEntryResponseDTO.setBuy(entry.getBuy());
-        tradeEntryResponseDTO.setSell(entry.getSell());
-        tradeEntryResponseDTO.setStopLoss(entry.getStopLoss());
-        tradeEntryResponseDTO.setTarget(entry.getTarget());
+        tradeEntryResponseDTO.setQuantity(entry.getQuantity());
+        tradeEntryResponseDTO.setEntryDate(entry.getEntryDate());
+        tradeEntryResponseDTO.setExitDate(entry.getExitDate());
+        tradeEntryResponseDTO.setEntryPrice(entry.getEntryPrice());
+        tradeEntryResponseDTO.setSL(entry.getSL());
+        tradeEntryResponseDTO.setSLPercent(entry.getSLPercent());
+        tradeEntryResponseDTO.setRiskPercent(entry.getRiskPercent());
+        tradeEntryResponseDTO.setT1(entry.getT1());
+        tradeEntryResponseDTO.setT1Percent(entry.getT1Percent());
+        tradeEntryResponseDTO.setT2(entry.getT2());
+        tradeEntryResponseDTO.setT2Percent(entry.getT2Percent());
+        tradeEntryResponseDTO.setExitPrice(entry.getExitPrice());
         tradeEntryResponseDTO.setProfit(entry.getProfit());
-        tradeEntryResponseDTO.setBuyPrice(entry.getBuyPrice());
-        tradeEntryResponseDTO.setSellPrice(entry.getSellPrice());
-        tradeEntryResponseDTO.setComments(entry.getComments());
+        tradeEntryResponseDTO.setProfitPercent(entry.getProfitPercent());
+        tradeEntryResponseDTO.setEntryComments(entry.getEntryComments());
+        tradeEntryResponseDTO.setExitComments(entry.getExitComments());
+        tradeEntryResponseDTO.setRemarks(entry.getRemarks());
         return tradeEntryResponseDTO;
+    }
+
+    public static PreferenceResponseDTO entityToDTO(TraderPreference entry){
+        PreferenceResponseDTO preferenceResponseDTO = PreferenceResponseDTO.builder()
+        		.id(entry.getId())
+        		.traderName(entry.getTraderName())
+        		.capital(entry.getCapital())
+        		.position(Constants.POSITION.valueOf(entry.getPosition()))
+        		.product(Constants.PRODUCT.valueOf(entry.getProduct()))
+        		.build();
+        return preferenceResponseDTO;
+    }
+
+    public static TraderPreference convertDTOToEntity(PreferenceRequestDTO requestDTO){
+        TraderPreference traderPreference = new TraderPreference();
+        copyReqToEntity(requestDTO, traderPreference);
+        return traderPreference;
+    }
+
+    public static void copyReqToEntity(PreferenceRequestDTO requestDTO, TraderPreference traderPreference) {
+        traderPreference.setTraderName(requestDTO.getTraderName());
+        traderPreference.setCapital(requestDTO.getCapital());
+        traderPreference.setProduct(String.valueOf(requestDTO.getProduct()));
+        traderPreference.setPosition(String.valueOf(requestDTO.getPosition()));
     }
 }
