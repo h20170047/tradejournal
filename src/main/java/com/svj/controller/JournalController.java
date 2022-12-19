@@ -79,7 +79,7 @@ public class JournalController {
         return response;
     }
 
-    @GetMapping("/date/{fromDate}/{toDate}")
+    @GetMapping("/entries/{fromDate}/{toDate}")
     public ServiceResponse getEntriesBetweenDates(@PathVariable String fromDate, @PathVariable String toDate){
         log.info("JournalController: getEntriesBetweenDates Starting method between dates- {}, {}", fromDate, toDate);
         List<TradeEntryResponseDTO> allEntries = journalService.getEntriesBetweenDates(LocalDate.parse(fromDate,dateFormatter), LocalDate.parse(toDate,dateFormatter));
@@ -88,4 +88,6 @@ public class JournalController {
         log.info("JournalController: getEntriesBetweenDates Method returning with {}", response);
         return response;
     }
+
+    // TODO- Get stats between 2 dates, weekly, monthly
 }

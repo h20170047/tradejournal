@@ -77,7 +77,7 @@ public class PreferenceController {
         return response;
     }
 
-    @GetMapping("/date/{name}")
+    @GetMapping("/name/{name}")
     public ServiceResponse getEntriesByName(@PathVariable String name){
         log.info("JournalController: getEntriesByName Starting method with date- {}", name);
         PreferenceResponseDTO preference = preferenceService.getEntriesByName(name);
