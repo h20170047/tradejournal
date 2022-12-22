@@ -1,16 +1,15 @@
 package com.svj.entity.stockscreener;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@Builder
 public class CPRWidth {
     private String name;
+    private String sector;
     private String cprWidth;
     private boolean narrowCPR;
 }

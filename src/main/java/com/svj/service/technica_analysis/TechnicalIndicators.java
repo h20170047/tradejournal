@@ -9,6 +9,6 @@ public class TechnicalIndicators {
         double top= (stock.getDayHigh()+stock.getDayLow())/2;
         double bottom=2*pivot-top;
         double cprWidth= Math.abs(top-bottom)/stock.getClose();
-        return new CPRWidth(stock.getSymbol(), String.format("%.4f", cprWidth), Math.abs(top-bottom)<stock.getClose()*0.001);
+        return CPRWidth.builder().name(stock.getSymbol()).cprWidth(String.format("%.4f", cprWidth)).narrowCPR( Math.abs(top-bottom)<stock.getClose()*0.001).build();
     }
 }
