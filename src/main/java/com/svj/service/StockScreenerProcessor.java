@@ -86,7 +86,13 @@ public class StockScreenerProcessor {
             // get 2weeks data from the nse1 api, get the last 3 days info from today, if it is market-hours. else consider today too
             // return response map data
             // considering only NIFTY 50 stocks
-            List<String> nifty50Stocks= getResourceFileAsStringList(niftyFilePath);
+            List<String> niftyStocksWithIndex = getResourceFileAsStringList(niftyFilePath);
+            Map<String, String> nifty50Stocks= new HashMap<>();
+            niftyStocksWithIndex.stream().forEach(line-> {
+                String stockName = line.split(",")[0];
+                String indexName = line.split(",")[1];
+                nifty50Stocks.put(stockName, indexName);
+            });
             Map<String, List<Stock>> threeDaysInfo= new HashMap<>();
             List<String> bullish= new LinkedList<>();
             List<String> bearish= new LinkedList<>();
@@ -98,7 +104,7 @@ public class StockScreenerProcessor {
                         getResourceFileAsStringList(file.toString()).stream()
                                 .skip(1)
                                 .filter(line-> line.split(",")[ONE].equals("EQ"))
-                                .filter(line-> nifty50Stocks.contains(line.split(",")[ZERO])) // if stock if nifty50, save to list
+                                .filter(line-> nifty50Stocks.get(line.split(",")[ZERO])!= null) // if stock if nifty50, save to list
                                 .map(line-> line.split(","))
                                 .map(stringArray-> new Stock(stringArray[ZERO], Double.parseDouble(stringArray[FIVE]), Double.parseDouble(stringArray[THREE]), Double.parseDouble(stringArray[FOUR]), Double.parseDouble(stringArray[TWO]), LocalDateTime.parse(stringArray[TEN], dateTimeFormatter))) // Pulling out necessary details
                                 .forEach(stock-> {
@@ -131,8 +137,10 @@ public class StockScreenerProcessor {
                 // analyse the latest day's CPR to check if it is trending for trade day. Last day is inserted first
                 ;
                 CPRWidth stockCPR = narrowCPR(data.get(0));
-                if(stockCPR.isNarrowCPR())  //check for CPR trend on all Nifty50 stocks
+                if(stockCPR.isNarrowCPR()) { //check for CPR trend on all Nifty50 stocks
+                    stockCPR.setSector(nifty50Stocks.get(stockCPR.getName()));
                     trending.add(stockCPR);
+                }
             }
             Collections.sort(trending, Comparator.comparing(CPRWidth::getCprWidth));
             result.setBullish(bullish);

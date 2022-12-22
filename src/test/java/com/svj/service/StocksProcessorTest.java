@@ -29,6 +29,7 @@ public class StocksProcessorTest {
     @Test
     public void getStocksList_BullsAndBears(){
         TradeSetupResponseDTO result = service.getStocksList(LocalDate.parse("26-11-2022", dateFormatter));
+        System.out.println(result);
         assertThat(result.getBullish()).isNotEmpty();
         assertThat(result.getBearish()).isNotEmpty();
     }
