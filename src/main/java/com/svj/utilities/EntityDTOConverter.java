@@ -20,6 +20,8 @@ public class EntityDTOConverter {
 
     public static void copyReqToEntity(TradeEntryRequestDTO requestDTO, TradeEntry tradeEntry) {
         tradeEntry.setTraderName(requestDTO.getTraderName());
+        tradeEntry.setPosition(requestDTO.getPosition());
+        tradeEntry.setProduct(requestDTO.getProduct());
         tradeEntry.setCapital(requestDTO.getCapital());
         tradeEntry.setSymbol(requestDTO.getSymbol());
         tradeEntry.setQuantity(requestDTO.getQuantity());
@@ -35,7 +37,7 @@ public class EntityDTOConverter {
         tradeEntry.setT2Percent(getT2Percent(requestDTO));
         tradeEntry.setExitPrice(requestDTO.getExitPrice());
         tradeEntry.setProfit(calculateProfit(requestDTO));
-        tradeEntry.setProfitPercent(getProfitPercent(requestDTO));
+        tradeEntry.setProfitPercent(getProfitPercent(tradeEntry));
         tradeEntry.setEntryComments(requestDTO.getEntryComments());
         tradeEntry.setExitComments(requestDTO.getExitComments());
         tradeEntry.setRemarks(requestDTO.getRemarks());
@@ -44,7 +46,7 @@ public class EntityDTOConverter {
     // Profit depends on position chosen
     private static Double calculateProfit(TradeEntryRequestDTO requestDTO) {
         if(requestDTO.getExitPrice()!= null){
-            if("LONG".equals(requestDTO.getPosition()))
+            if("LONG".equals(requestDTO.getPosition().toString()))
                 return requestDTO.getExitPrice()- requestDTO.getEntryPrice();
             else
                 return requestDTO.getEntryPrice()- requestDTO.getExitPrice();
@@ -52,7 +54,7 @@ public class EntityDTOConverter {
         return null;
     }
 
-    private static Double getProfitPercent(TradeEntryRequestDTO requestDTO) {
+    private static Double getProfitPercent(TradeEntry requestDTO) {
         if(requestDTO.getProfit()!= null){
             return requestDTO.getProfit()/requestDTO.getEntryPrice()*100;
         }
@@ -75,7 +77,7 @@ public class EntityDTOConverter {
     }
 
     private static double getSLPercent(TradeEntryRequestDTO requestDTO) {
-        return Math.min(requestDTO.getSL(), requestDTO.getEntryPrice())/Math.max(requestDTO.getSL(), requestDTO.getEntryPrice() )*100;
+        return Math.abs(requestDTO.getSL()- requestDTO.getEntryPrice())/requestDTO.getEntryPrice() *100;
     }
 
     public static TradeEntryResponseDTO entityToDTO(TradeEntry entry){

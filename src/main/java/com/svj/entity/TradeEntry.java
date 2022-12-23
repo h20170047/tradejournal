@@ -29,10 +29,10 @@ public class TradeEntry {
     private LocalDate entryDate;
     private LocalDate exitDate;
     private Double entryPrice;
-    private double SL;
+    private Double SL;
     private double SLPercent;
     private double riskPercent; // if capital is not provided, assume 3K or take from absolute
-    private double T1;
+    private Double T1;
     private double T1Percent;
     private Double T2;
     private Double T2Percent;

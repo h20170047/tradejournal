@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @Data
@@ -26,19 +27,19 @@ public class TradeEntryRequestDTO {
     // provision to override
     private POSITION position;
     private PRODUCT product;
-    @NotBlank
-    private int quantity;
-    @NotBlank
+    @NotNull
+    private Integer quantity;
+    @NotNull
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern="d-M-yyyy")
     private LocalDate entryDate;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern="d-M-yyyy")
     private LocalDate exitDate;
-    @NotBlank
+    @NotNull
     private Double entryPrice;
-    @NotBlank
-    private double SL;
-    @NotBlank
-    private double T1;
+    @NotNull
+    private Double SL;
+    @NotNull
+    private Double T1;
     private Double T2;
     private Double exitPrice;
     private Double profit;

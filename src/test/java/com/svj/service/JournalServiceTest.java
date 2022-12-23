@@ -45,11 +45,11 @@ class JournalServiceTest {
         service= new JournalService(repository, preferenceRepository);
         requestDTO= TradeEntryRequestDTO.builder()
                 .symbol("SYM").traderName("TEST").quantity(10).entryDate(LocalDate.parse("12-03-2000", dateFormatter))
-                .entryPrice(100.0).SL(90).T1(110).build();
+                .entryPrice(100.0).SL(90.0).T1(110.0).build();
         tradeEntry= TradeEntry.builder()
                 .symbol("SYM").id("ID").traderName("TEST").quantity(10)
                 .entryDate(LocalDate.parse("12-03-2000", dateFormatter))
-                        .entryPrice(100.0).SL(90).T1(110).build();
+                        .entryPrice(100.0).SL(90.0).T1(110.0).build();
         preference= TraderPreference.builder().id("ID").traderName("TEST").capital(1000.0).product("INTRADAY").position("LONG")
                 .build();
     }

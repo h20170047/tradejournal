@@ -13,7 +13,8 @@ import java.util.List;
 public class TradeSetupResponseDTO {
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "d-M-yyyy")
     private LocalDate tradeDate;
+    private List<CPRWidth> trending;
     private List<String> bullish;
     private List<String> bearish;
-    private List<CPRWidth> trending;
+    private List<String> others;
 }

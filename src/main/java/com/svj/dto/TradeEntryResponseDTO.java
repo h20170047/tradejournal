@@ -2,16 +2,13 @@ package com.svj.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.svj.utilities.Constants.*;
+import com.svj.utilities.Constants.POSITION;
+import com.svj.utilities.Constants.PRODUCT;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Generated;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -31,10 +28,10 @@ public class TradeEntryResponseDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern="d-M-yyyy")
     private LocalDate exitDate;
     private Double entryPrice;
-    private double SL;
+    private Double SL;
     private double SLPercent;
     private double riskPercent; // if capital is not provided, assume 3K or take from absolute
-    private double T1;
+    private Double T1;
     private double T1Percent;
     private Double T2;
     private Double T2Percent;

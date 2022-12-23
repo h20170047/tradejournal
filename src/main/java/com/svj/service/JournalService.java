@@ -44,9 +44,9 @@ public class JournalService {
             TradeEntry savedEntry = journalRepository.save(tradeEntry);
             log.debug("TradeService: addEntry Response from db is {}", savedEntry);
             // update balance in preference if exit prices is present
-            if(requestDTO.getProfit()!= null){
+            if(savedEntry.getProfit()!= null){
                 log.info("TradeService: addEntry Updating capital in trader preference based on profit from newly added entry");
-                preference.setCapital( preference.getCapital() + requestDTO.getProfit() );
+                preference.setCapital( preference.getCapital() + savedEntry.getProfit() );
                 TraderPreference savedPreference = preferenceRepository.save(preference);
                 log.debug("TradeService: addEntry Updated capital in trader preference table: {}", savedPreference);
             }
@@ -195,4 +195,6 @@ public class JournalService {
         }
         return result;
     }
+    // TODO- check journal entity is not having -ve %(SL, T1, T2) if they arent null
+//    public
 }

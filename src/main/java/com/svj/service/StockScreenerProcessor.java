@@ -96,6 +96,7 @@ public class StockScreenerProcessor {
             Map<String, List<Stock>> threeDaysInfo= new HashMap<>();
             List<String> bullish= new LinkedList<>();
             List<String> bearish= new LinkedList<>();
+            List<String> others= new LinkedList<>();
             List<CPRWidth> trending= new LinkedList<>();
             dataList.stream()
                 .forEach(file->{
@@ -143,9 +144,16 @@ public class StockScreenerProcessor {
                 }
             }
             Collections.sort(trending, Comparator.comparing(CPRWidth::getCprWidth));
+            List<String> narrowCPRStocks= trending.stream().map(cprStock-> cprStock.getName()).collect(Collectors.toList());
+            List<String> otherN50Stocks= new LinkedList<>();
+            for(String stock: nifty50Stocks.keySet()){
+                if(!(bullish.contains(stock) || bearish.contains(stock) || narrowCPRStocks.contains(stock)))
+                    otherN50Stocks.add(stock);
+            }
             result.setBullish(bullish);
             result.setBearish(bearish);
             result.setTrending(trending);
+            result.setOthers(otherN50Stocks);
             log.info("NSEService:getStocksList Method execution completed");
             return result;
         }catch (Exception e){
