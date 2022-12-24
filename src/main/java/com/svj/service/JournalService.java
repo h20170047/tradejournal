@@ -2,6 +2,7 @@ package com.svj.service;
 
 import com.svj.dto.TradeEntryRequestDTO;
 import com.svj.dto.TradeEntryResponseDTO;
+import com.svj.entity.BlackList;
 import com.svj.entity.TradeEntry;
 import com.svj.entity.TradeStats;
 import com.svj.entity.TraderPreference;
@@ -21,18 +22,22 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static com.svj.utilities.EntityDTOConverter.*;
+import static com.svj.utilities.JsonParser.jsonToString;
 
 @Service
 @Slf4j
 public class JournalService {
     private JournalRepository journalRepository;
     private PreferenceRepository preferenceRepository;
+    private BlackListService blackListService;
 
     @Autowired
     public JournalService(JournalRepository repository,
-                          PreferenceRepository preferenceRepository){
+                          PreferenceRepository preferenceRepository,
+                          BlackListService blackListService){
         journalRepository = repository;
         this.preferenceRepository= preferenceRepository;
+        this.blackListService= blackListService;
     }
 
     public TradeEntryResponseDTO addEntry(TradeEntryRequestDTO requestDTO){
@@ -41,18 +46,25 @@ public class JournalService {
             TraderPreference preference = preferenceRepository.findByTraderName(requestDTO.getTraderName());
             populateDefaultValues(preference, requestDTO);
             TradeEntry tradeEntry = convertDTOToEntity(requestDTO);
-            TradeEntry savedEntry = journalRepository.save(tradeEntry);
-            log.debug("TradeService: addEntry Response from db is {}", savedEntry);
+            TradeEntry savedEntry;
+            if(arePercentsPostivie(tradeEntry)) {
+                BlackList blackList = blackListService.blackListStock(tradeEntry);
+                log.debug("TradeService: addEntry Updated blackList db for Trader: {}. Current blackList: {}", tradeEntry.getTraderName(), jsonToString(blackList));
+                savedEntry = journalRepository.save(tradeEntry);
+            }else
+                throw new TradeProcessException("Percent calculation can not lead to -ve result");
+            log.debug("TradeService: addEntry Response from db is {}", jsonToString(savedEntry));
             // update balance in preference if exit prices is present
             if(savedEntry.getProfit()!= null){
                 log.info("TradeService: addEntry Updating capital in trader preference based on profit from newly added entry");
                 preference.setCapital( preference.getCapital() + savedEntry.getProfit() );
                 TraderPreference savedPreference = preferenceRepository.save(preference);
-                log.debug("TradeService: addEntry Updated capital in trader preference table: {}", savedPreference);
+                log.debug("TradeService: addEntry Updated capital in trader preference table: {}", jsonToString(savedPreference));
             }
             log.info("TradeService: addEntry method ended.");
             return entityToDTO(savedEntry);
         }catch (Exception ex){
+            ex.printStackTrace();
             log.error("TradeService: addEntry Exception occured: {}", ex.getMessage());
             throw new TradeProcessException(ex.getMessage());
         }
@@ -79,11 +91,17 @@ public class JournalService {
                 log.info("TradeService: updateEntry There is a change in profit compared to previous entry. Updating capital in trader preference based on change");
                 preference.setCapital( preference.getCapital() - dbEntry.getProfit() + (requestDTO.getExitPrice()- requestDTO.getEntryPrice()));
                 TraderPreference savedPreference = preferenceRepository.save(preference);
-                log.debug("TradeService: updateEntry Updated capital in trader preference table: {}", preference);
+                log.debug("TradeService: updateEntry Updated capital in trader preference table: {}", jsonToString(preference));
             }
             copyReqToEntity(requestDTO, dbEntry);
-            TradeEntry savedEntry = journalRepository.save(dbEntry);
-            log.debug("TradeService: updateEntry Updated entry from db is {}", savedEntry);
+            TradeEntry savedEntry;
+            if(arePercentsPostivie(dbEntry)) {
+                BlackList blackList = blackListService.blackListStock(dbEntry);
+                log.debug("TradeService: addEntry Updated blackList db for Trader: {}. Current blackList: {}", dbEntry.getTraderName(), jsonToString(blackList));
+                savedEntry = journalRepository.save(dbEntry);
+            }else
+                throw new TradeProcessException("Percent calculation can not lead to -ve result");
+            log.debug("TradeService: updateEntry Updated entry from db is {}", jsonToString(savedEntry));
             log.info("TradeService: updateEntry method ended.");
             return entityToDTO(savedEntry);
         }catch (Exception ex){
@@ -95,7 +113,7 @@ public class JournalService {
         try{
             log.info("TradeService: getEntryByID Starting method.");
             TradeEntry dbEntry= journalRepository.findById(id).orElseThrow(()->  new TradeProcessException("Unable to find the requested trade entry"));
-            log.debug("TradeService: getEntryByID Retrieved entry from db is {}", dbEntry);
+            log.debug("TradeService: getEntryByID Retrieved entry from db is {}", jsonToString(dbEntry));
             log.info("TradeService: getEntryByID method ended.");
             return entityToDTO(dbEntry);
         }catch (Exception ex){
@@ -130,7 +148,7 @@ public class JournalService {
                 log.info("TradeService: deleteEntry Removing profit in preference table due to this entry");
                 preference.setCapital( preference.getCapital() - dbEntry.getProfit());
                 TraderPreference savedPreference = preferenceRepository.save(preference);
-                log.debug("TradeService: deleteEntry Updated capital in trader preference table: {}", preference);
+                log.debug("TradeService: deleteEntry Updated capital in trader preference table: {}", jsonToString(preference));
             }
             journalRepository.deleteById(id);
             log.info("TradeService: deleteEntry method ended.");
@@ -162,10 +180,11 @@ public class JournalService {
         List<TradeEntryResponseDTO> entriesBetweenDates = getEntriesBetweenDates(fromDate, toDate);
         TradeStats result= new TradeStats();
         result.setFromDate(fromDate); result.setToDate(toDate);
-        int totalTrades= 0, lossCount= 0;
-        double winProbability, totalProfit= 0, winCount= 0;
+        int totalTrades= 0, lossCount= 0, openTradeCount= 0;
+        double winProbability, totalProfit= 0, winCount= 0, totalCapitalGain= 0;
         List<String> successComments= new LinkedList<>();
         List<String> cautionComments= new LinkedList<>();
+        List<TradeEntryResponseDTO> openTrades= new LinkedList<>();
         for(TradeEntryResponseDTO journal: entriesBetweenDates){
             if(journal.getExitPrice()!= null){
                 // if trade is complete process it
@@ -179,6 +198,10 @@ public class JournalService {
                     lossCount++;
                     cautionComments.add(String.format("Entry: %s || Exit: %s",journal.getEntryComments(),journal.getExitComments()));
                 }
+                totalCapitalGain+= journal.getProfitPercent();
+            }else{
+                openTradeCount++;
+                openTrades.add(journal);
             }
         }
         if(totalTrades> 0) {
@@ -192,9 +215,18 @@ public class JournalService {
             result.setCautionComments(cautionComments);
             result.setFromDate(fromDate);
             result.setToDate(toDate);
+            result.setOpenTradeCount(openTradeCount);
+            result.setTotalPoints((int) (winCount-lossCount));
+            result.setTotalCapitalGain(totalCapitalGain);
+            result.setOpenTrades(openTrades);
         }
         return result;
     }
     // TODO- check journal entity is not having -ve %(SL, T1, T2) if they arent null
-//    public
+    public boolean arePercentsPostivie(TradeEntry entry){
+        if(entry.getSLPercent()>0 && entry.getT1Percent()>0 && (entry.getT2()== null || (entry.getT2()!= null && entry.getT2Percent()> 0)))
+            return true;
+        else
+            return false;
+    }
 }

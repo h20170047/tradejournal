@@ -5,6 +5,7 @@ import com.svj.dto.TradeEntryResponseDTO;
 import com.svj.entity.TradeEntry;
 import com.svj.entity.TradeStats;
 import com.svj.entity.TraderPreference;
+import com.svj.repository.BlackListRepository;
 import com.svj.repository.JournalRepository;
 import com.svj.repository.PreferenceRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +35,10 @@ class JournalServiceTest {
     private JournalRepository repository;
     @Mock
     private PreferenceRepository preferenceRepository;
+    @InjectMocks
+    private BlackListService blackListService;
+    @Mock
+    private BlackListRepository blackListRepository;
 
 
     TradeEntryRequestDTO requestDTO;
@@ -42,7 +47,7 @@ class JournalServiceTest {
 
     @BeforeEach
     public void setup(){
-        service= new JournalService(repository, preferenceRepository);
+        service= new JournalService(repository, preferenceRepository, blackListService);
         requestDTO= TradeEntryRequestDTO.builder()
                 .symbol("SYM").traderName("TEST").quantity(10).entryDate(LocalDate.parse("12-03-2000", dateFormatter))
                 .entryPrice(100.0).SL(90.0).T1(110.0).build();
@@ -116,8 +121,8 @@ class JournalServiceTest {
         LocalDate fromDate = LocalDate.parse("1-03-2000", dateFormatter);
         LocalDate toDate = LocalDate.parse("12-03-2000", dateFormatter);
         List<TradeEntry> entries= Arrays.asList(
-                TradeEntry.builder().id("id-1").symbol("SYM").traderName("TEST").quantity(10).entryDate(LocalDate.parse("12-03-2000", dateFormatter)).entryPrice(100.0).exitPrice(110.0).profit(10.0).build(),
-                TradeEntry.builder().id("id-2").symbol("SYM").traderName("TEST").quantity(10).entryDate(LocalDate.parse("12-03-2000", dateFormatter)).entryPrice(95.0).exitPrice(85.0).profit(-10.0).build()
+                TradeEntry.builder().id("id-1").symbol("SYM").traderName("TEST").quantity(10).entryDate(LocalDate.parse("12-03-2000", dateFormatter)).entryPrice(100.0).exitPrice(110.0).profit(10.0).profitPercent(2d).build(),
+                TradeEntry.builder().id("id-2").symbol("SYM").traderName("TEST").quantity(10).entryDate(LocalDate.parse("12-03-2000", dateFormatter)).entryPrice(95.0).exitPrice(85.0).profit(-10.0).profitPercent(-1d).build()
         );
         when(repository.findEntriesByDate(any(LocalDate.class), any(LocalDate.class))).thenReturn(entries);
         TradeStats tradeStats = service.computeStats(fromDate, toDate);

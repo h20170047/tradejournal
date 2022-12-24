@@ -7,6 +7,7 @@ import com.svj.exceptionHandling.FileException;
 import com.svj.exceptionHandling.StockProcessingException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -39,12 +40,15 @@ public class StockScreenerProcessor {
     private int candleCount;
     DateTimeFormatter dateTimeFormatter;
     private NSEService NService;
+    private BlackListService blackListService;
 
+    @Autowired
     public StockScreenerProcessor(@Value("${nse.data.bhavcopy}")String dataPath,
                                   @Value("${nse.data.nifty50}")String niftyFilePath,
                                   @Value("${nse.data.holiday}")String holidayFilePath,
-                                  @Value("${strategy.countOfCandlesConsidered}")Integer candleCount,
-                                  NSEService NService){
+                                  @Value("${strategy.countOfCandlesConsidered}")int candleCount,
+                                  NSEService NService,
+                                  BlackListService blackListService){
         this.dataPath= dataPath;
         this.niftyFilePath = niftyFilePath;
         this.holidayFilePath = holidayFilePath;
@@ -57,11 +61,13 @@ public class StockScreenerProcessor {
                         .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
                         .toFormatter();
         this.NService= NService;
+        this.blackListService= blackListService;
     }
 
 
-    public TradeSetupResponseDTO getStocksList(LocalDate tradeDay) {
+    public TradeSetupResponseDTO getStocksList(LocalDate tradeDay, String traderName) {
         log.info("NSEService:getStocksList Method execution started");
+        Set<String> blackListedStocks= blackListService.getBlackListedStocks(traderName);
         try{
             TradeSetupResponseDTO result= new TradeSetupResponseDTO();
             result.setTradeDate(tradeDay);
@@ -96,7 +102,6 @@ public class StockScreenerProcessor {
             Map<String, List<Stock>> threeDaysInfo= new HashMap<>();
             List<String> bullish= new LinkedList<>();
             List<String> bearish= new LinkedList<>();
-            List<String> others= new LinkedList<>();
             List<CPRWidth> trending= new LinkedList<>();
             dataList.stream()
                 .forEach(file->{
@@ -129,16 +134,15 @@ public class StockScreenerProcessor {
                         i= TEN;
                     }
                 }
-                if(i==candleCount){ // This stock has similar behavior as its first candle. Categorize it into either bullish or bearish bucket
+                if(i==candleCount && (setDoesntContainsString(blackListedStocks, stock) ) ){ // This stock has similar behavior as its first candle. Categorize it into either bullish or bearish bucket
                     if(isBullish)
                         bullish.add(stock);
                     else
                         bearish.add(stock);
                 }
                 // analyse the latest day's CPR to check if it is trending for trade day. Last day is inserted first
-                ;
                 CPRWidth stockCPR = narrowCPR(data.get(0));
-                if(stockCPR.isNarrowCPR()) { //check for CPR trend on all Nifty50 stocks
+                if(  setDoesntContainsString(blackListedStocks, data.get(0).getSymbol()) && stockCPR.isNarrowCPR()) { //check for CPR trend on all Nifty50 stocks
                     stockCPR.setSector(nifty50Stocks.get(stockCPR.getName()));
                     trending.add(stockCPR);
                 }
@@ -147,19 +151,25 @@ public class StockScreenerProcessor {
             List<String> narrowCPRStocks= trending.stream().map(cprStock-> cprStock.getName()).collect(Collectors.toList());
             List<String> otherN50Stocks= new LinkedList<>();
             for(String stock: nifty50Stocks.keySet()){
-                if(!(bullish.contains(stock) || bearish.contains(stock) || narrowCPRStocks.contains(stock)))
+                if(!(bullish.contains(stock) || bearish.contains(stock) || narrowCPRStocks.contains(stock) || (blackListedStocks!= null && blackListedStocks.contains(stock))) )
                     otherN50Stocks.add(stock);
             }
             result.setBullish(bullish);
             result.setBearish(bearish);
             result.setTrending(trending);
+            result.setBlackListedStocks(blackListedStocks);
             result.setOthers(otherN50Stocks);
             log.info("NSEService:getStocksList Method execution completed");
             return result;
         }catch (Exception e){
+            e.printStackTrace();
             log.error("NSEService:getStocksList Exception occurred while getting stocks filtering- {}", e.getMessage());
             throw new StockProcessingException(e.getMessage());
         }
+    }
+
+    private boolean setDoesntContainsString(Set<String> blackListedStocks, String stock) {
+        return blackListedStocks== null || (blackListedStocks!= null && !blackListedStocks.contains(stock));
     }
 
     public List<LocalDate> getHolidayList(String filePath) {

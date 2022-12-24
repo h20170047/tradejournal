@@ -1,10 +1,17 @@
 package com.svj.service;
 
 import com.svj.dto.TradeSetupResponseDTO;
+import com.svj.entity.BlackList;
 import com.svj.exceptionHandling.StockProcessingException;
+import com.svj.repository.BlackListRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -12,23 +19,35 @@ import java.util.List;
 import static com.svj.utilities.AppUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class StocksProcessorTest {
 
+    @Autowired
     private StockScreenerProcessor service;
+    @Autowired
+    private BlackListService blackListService;
+    @Mock
+    private BlackListRepository blackListRepository;
 
     @BeforeEach
     public void setup(){
+        blackListService= new BlackListService(blackListRepository,"Nifty50List.txt");
         service = new StockScreenerProcessor("data/",
                 "Nifty50List.txt",
                 "NSEHolidays.txt",
                 3,
-                new NSEService("save/", "target/test-classes/data"));
+                new NSEService("save/", "target/test-classes/data"),
+                blackListService);
     }
 
     @Test
     public void getStocksList_BullsAndBears(){
-        TradeSetupResponseDTO result = service.getStocksList(LocalDate.parse("26-11-2022", dateFormatter));
+        BlackList blackList= BlackList.builder().traderName("Test").build();
+        when(blackListRepository.findByTraderName(any(String.class))).thenReturn(blackList);
+        TradeSetupResponseDTO result = service.getStocksList(LocalDate.parse("26-11-2022", dateFormatter), "Test");
         System.out.println(result);
         assertThat(result.getBullish()).isNotEmpty();
         assertThat(result.getBearish()).isNotEmpty();
@@ -37,14 +56,14 @@ public class StocksProcessorTest {
     @Test
     @Disabled
     public void getStocksList_getNextTradeSetup(){
-        TradeSetupResponseDTO result = service.getStocksList(LocalDate.parse("16-12-2022", dateFormatter));
+        TradeSetupResponseDTO result = service.getStocksList(LocalDate.parse("16-12-2022", dateFormatter), "Test");
         System.out.println(result);
     }
 
     @Test
     @Disabled // wont fail as necessary files will be fetched from NSE before processing
     public void getStocksList_MissingNecessaryData(){
-        assertThrows(StockProcessingException.class, ()-> service.getStocksList(LocalDate.parse("1-12-2022", dateFormatter)));
+        assertThrows(StockProcessingException.class, ()-> service.getStocksList(LocalDate.parse("1-12-2022", dateFormatter), "Test"));
     }
 
     @Test

@@ -58,7 +58,7 @@ public class TradeJournalIntegrationTests {
         TraderPreference trader= TraderPreference.builder().id("1").traderName(traderName).capital(3000.0).product("INTRADAY").position("LONG").build();
         prefRepo.save(trader);
         // Add trade entry
-        TradeEntryRequestDTO entryRequestDTO = TradeEntryRequestDTO.builder().traderName(traderName).symbol("TEST").quantity(1).entryDate(LocalDate.parse("1-03-2000", dateFormatter)).quantity(1).entryPrice(100.0).SL(90.0).T1(110.0).exitPrice(110.0).build();
+        TradeEntryRequestDTO entryRequestDTO = TradeEntryRequestDTO.builder().traderName(traderName).symbol("UPL").quantity(1).entryDate(LocalDate.parse("1-03-2000", dateFormatter)).quantity(1).entryPrice(100.0).SL(90.0).T1(110.0).exitPrice(110.0).build();
         ServiceResponse journalServerResponse = restTemplate.postForObject(journalBaseUrl, entryRequestDTO, ServiceResponse.class);
         // check if balance of trader is updated
         ServiceResponse<PreferenceResponseDTO> preferenceServerResponse = restTemplate.getForObject(preferenceBaseUrl.concat("/name/{traderName}"), ServiceResponse.class,traderName);
@@ -74,4 +74,5 @@ public class TradeJournalIntegrationTests {
         // check if right validation happened
         assertTrue(String.valueOf(journalServerResponse.getErrors().get(0)).contains("quantity : must not be null"));
     }
+    // TODO- when blacklist doesnt exist for user, trade-setup should be returned without error
 }

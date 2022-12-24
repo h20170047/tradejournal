@@ -11,10 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
@@ -28,6 +25,7 @@ public class StockScreenerController {
         service= StockScreenerProcessor;
     }
 
+    // TODO- trader name to be retrieved from jwt
     @GetMapping("/trade-setup/{tradeDate}")
     // input date, and take necessary files from common pool.
     // if required files are missing, return corresponding error message
@@ -39,9 +37,9 @@ public class StockScreenerController {
             @ApiResponse(responseCode ="400", description="Entered inputs are not valid"),
             @ApiResponse(responseCode ="500", description="Some error at server side")
     })
-    public ServiceResponse getTradeSetup(@PathVariable @DateTimeFormat(pattern="d-M-yyyy") LocalDate tradeDate){
+    public ServiceResponse getTradeSetup(@PathVariable @DateTimeFormat(pattern="d-M-yyyy") LocalDate tradeDate, @RequestParam(defaultValue = "Swaraj") String traderName){ // TODO- traderName to be retrieved from jwt
         log.info("AnalysisController:getTradeSetup Received request with tradeDate= {}", tradeDate.toString());
-        TradeSetupResponseDTO stocksList = service.getStocksList(tradeDate);
+        TradeSetupResponseDTO stocksList = service.getStocksList(tradeDate, traderName);
         ServiceResponse response = new ServiceResponse(HttpStatus.OK, stocksList, null);
         log.info("AnalysisController:getTradeSetup Response {}", response);
         return response;

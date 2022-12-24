@@ -90,4 +90,23 @@ public class JournalController {
     }
 
     // TODO- Get stats between 2 dates, weekly, monthly
+    @GetMapping("/entries/report/week")
+    public ServiceResponse getEntriesForWeek(){
+        log.info("JournalController: getEntriesForWeek Starting method for week {}", LocalDate.now());
+        List<TradeEntryResponseDTO> allEntries = journalService.getEntriesBetweenDates(LocalDate.parse(LocalDate.now().plusDays(-(7+2)).toString(),dateFormatter), LocalDate.parse(LocalDate.now().toString(),dateFormatter));
+        log.debug("JournalController: getEntriesForWeek Response from service is {}", jsonToString(allEntries));
+        ServiceResponse response= new ServiceResponse(HttpStatus.OK, allEntries, null);
+        log.info("JournalController: getEntriesForWeek Method returning with {}", response);
+        return response;
+    }
+
+    @GetMapping("/entries/report/month")
+    public ServiceResponse getEntriesForMonth(){
+        log.info("JournalController: getEntriesForMonth Starting method for week {}", LocalDate.now());
+        List<TradeEntryResponseDTO> allEntries = journalService.getEntriesBetweenDates(LocalDate.parse(LocalDate.now().plusDays(-(30+(2*4))).toString(),dateFormatter), LocalDate.parse(LocalDate.now().toString(),dateFormatter));
+        log.debug("JournalController: getEntriesForMonth Response from service is {}", jsonToString(allEntries));
+        ServiceResponse response= new ServiceResponse(HttpStatus.OK, allEntries, null);
+        log.info("JournalController: getEntriesForMonth Method returning with {}", response);
+        return response;
+    }
 }

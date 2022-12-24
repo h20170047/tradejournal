@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -17,4 +18,5 @@ public class TradeSetupResponseDTO {
     private List<String> bullish;
     private List<String> bearish;
     private List<String> others;
+    private Set<String> blackListedStocks;
 }
