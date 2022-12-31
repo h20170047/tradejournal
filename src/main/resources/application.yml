@@ -8,3 +8,6 @@ nse:
 
 strategy:
     countOfCandlesConsidered: 3
+
+input:
+    filePath: "InputData.csv"

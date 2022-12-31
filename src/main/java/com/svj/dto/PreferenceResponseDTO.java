@@ -19,6 +19,6 @@ public class PreferenceResponseDTO {
     private String id;
     private String traderName;
     private Double capital;
-    private POSITION position;
-    private PRODUCT product;
+    private String position;
+    private String product;
 }

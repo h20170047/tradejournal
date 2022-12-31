@@ -23,8 +23,8 @@ public class TradeEntry {
     private String traderName;
     private Double capital;
     private String symbol;
-    private Constants.POSITION position;
-    private Constants.PRODUCT product;
+    private String position;
+    private String product;
     private int quantity;
     private LocalDate entryDate;
     private LocalDate exitDate;
@@ -32,6 +32,7 @@ public class TradeEntry {
     private Double SL;
     private double SLPercent;
     private double riskPercent; // if capital is not provided, assume 3K or take from absolute
+    private double rewardRiskRatio;
     private Double T1;
     private double T1Percent;
     private Double T2;

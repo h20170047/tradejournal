@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.svj.utilities.Constants.POSITION;
 import com.svj.utilities.Constants.PRODUCT;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,13 +15,14 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder
 public class TradeEntryResponseDTO {
     private String id;
     private String traderName;
     private Double capital;
     private String symbol;
-    private POSITION position;
-    private PRODUCT product;
+    private String position;
+    private String product;
     private int quantity;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern="d-M-yyyy")
     private LocalDate entryDate;
@@ -30,6 +32,7 @@ public class TradeEntryResponseDTO {
     private Double SL;
     private double SLPercent;
     private double riskPercent; // if capital is not provided, assume 3K or take from absolute
+    private double rewardRiskRatio;
     private Double T1;
     private double T1Percent;
     private Double T2;

@@ -21,8 +21,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static com.svj.utilities.AppUtils.readJournalEntriesFromFile;
 import static com.svj.utilities.EntityDTOConverter.*;
 import static com.svj.utilities.JsonParser.jsonToString;
+import static com.svj.utilities.JsonParser.objectMapper;
 
 @Service
 @Slf4j
@@ -47,7 +49,7 @@ public class JournalService {
             populateDefaultValues(preference, requestDTO);
             TradeEntry tradeEntry = convertDTOToEntity(requestDTO);
             TradeEntry savedEntry;
-            if(arePercentsPostivie(tradeEntry)) {
+            if(arePercentsPositive(tradeEntry)) {
                 BlackList blackList = blackListService.blackListStock(tradeEntry);
                 log.debug("TradeService: addEntry Updated blackList db for Trader: {}. Current blackList: {}", tradeEntry.getTraderName(), jsonToString(blackList));
                 savedEntry = journalRepository.save(tradeEntry);
@@ -74,9 +76,9 @@ public class JournalService {
         if(requestDTO.getCapital()== null)
             requestDTO.setCapital(preference.getCapital());
         if(requestDTO.getPosition()== null)
-            requestDTO.setPosition(Constants.POSITION.valueOf(preference.getPosition()));
+            requestDTO.setPosition(preference.getPosition());
         if(requestDTO.getProduct()== null)
-            requestDTO.setProduct(Constants.PRODUCT.valueOf(preference.getProduct()));
+            requestDTO.setProduct(preference.getProduct());
     }
 
     public TradeEntryResponseDTO updateEntry(String id, TradeEntryRequestDTO requestDTO){
@@ -95,7 +97,7 @@ public class JournalService {
             }
             copyReqToEntity(requestDTO, dbEntry);
             TradeEntry savedEntry;
-            if(arePercentsPostivie(dbEntry)) {
+            if(arePercentsPositive(dbEntry)) {
                 BlackList blackList = blackListService.blackListStock(dbEntry);
                 log.debug("TradeService: addEntry Updated blackList db for Trader: {}. Current blackList: {}", dbEntry.getTraderName(), jsonToString(blackList));
                 savedEntry = journalRepository.save(dbEntry);
@@ -175,8 +177,7 @@ public class JournalService {
         }
     }
 
-    public TradeStats computeStats(String traderName, LocalDate fromDate, LocalDate toDate){
-        List<TradeEntryResponseDTO> entriesBetweenDates = getEntriesBetweenDates(traderName, fromDate, toDate);
+    public TradeStats computeStats(List<TradeEntryResponseDTO> entriesBetweenDates, LocalDate fromDate, LocalDate toDate){
         TradeStats result= new TradeStats();
         result.setFromDate(fromDate); result.setToDate(toDate);
         int totalTrades= 0, lossCount= 0, openTradeCount= 0;
@@ -222,10 +223,34 @@ public class JournalService {
         return result;
     }
 
-    public boolean arePercentsPostivie(TradeEntry entry){
-        if(entry.getSLPercent()>0 && entry.getT1Percent()>0 && (entry.getT2()== null || (entry.getT2()!= null && entry.getT2Percent()> 0)))
+    public boolean arePercentsPositive(TradeEntry entry){
+        if(entry.getSLPercent()>=0 && entry.getT1Percent()>=0 )
             return true;
         else
             return false;
+    }
+
+    public List<TradeEntryResponseDTO> bulkAddEntries(String filePath, String traderName){
+        try{
+            log.info("TradeService: bulkAddEntries Starting method.");
+            List<TradeEntryRequestDTO> tradeEntryRequestDTOS = readJournalEntriesFromFile(filePath, traderName);
+            String pos= preferenceRepository.findByTraderName(traderName).getPosition();
+            String prod= preferenceRepository.findByTraderName(traderName).getProduct();
+            for(TradeEntryRequestDTO entry: tradeEntryRequestDTOS){
+                entry.setProduct(prod);
+                entry.setPosition(pos);
+            }
+            log.debug("TradeService: bulkAddEntries Read info from file is {}", jsonToString(tradeEntryRequestDTOS));
+            List<TradeEntryResponseDTO> responseDTOS = new LinkedList<>();
+            for(TradeEntryRequestDTO requestDTO: tradeEntryRequestDTOS) {
+                log.debug("TradeService: bulkAddEntries Saving to DB: {}", jsonToString(requestDTO));
+                responseDTOS.add(addEntry(requestDTO));
+            }
+            log.info("TradeService: bulkAddEntries Method ended");
+            return responseDTOS;
+        }catch (Exception e){
+            log.error("TradeService: bulkAddEntries Exception occurred while saving data {}", e.getMessage());
+            return null;
+        }
     }
 }

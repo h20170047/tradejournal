@@ -56,7 +56,7 @@ public class BlackListService {
         if(tradeEntry.getProfit()== null)
             return null;
         if(nifty50Stocks.get(tradeEntry.getSymbol())== null)
-            throw new StockProcessingException("Traded stock is not present in the given list");
+            throw new StockProcessingException(String.format("Traded stock: %s is not present in the given list", tradeEntry.getSymbol()));
         BlackList blackList = blackListRepository.findByTraderName(tradeEntry.getTraderName());
         if(tradeEntry.getProfit()< 0){
             // Add to blacklist

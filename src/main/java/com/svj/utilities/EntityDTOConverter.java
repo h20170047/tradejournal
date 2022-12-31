@@ -7,8 +7,6 @@ import com.svj.dto.TradeEntryRequestDTO;
 import com.svj.dto.TradeEntryResponseDTO;
 import com.svj.entity.TraderPreference;
 
-import java.time.LocalDate;
-
 public class EntityDTOConverter {
 
     public static TradeEntry convertDTOToEntity(TradeEntryRequestDTO requestDTO){
@@ -31,6 +29,7 @@ public class EntityDTOConverter {
         tradeEntry.setSL(requestDTO.getSL());
         tradeEntry.setSLPercent(getSLPercent(requestDTO));
         tradeEntry.setRiskPercent(getRiskPercent(requestDTO));
+        tradeEntry.setRewardRiskRatio(getRewardRiskRatio(requestDTO));
         tradeEntry.setT1(requestDTO.getT1());
         tradeEntry.setT1Percent(getT1Percent(requestDTO));
         tradeEntry.setT2(requestDTO.getT2());
@@ -41,6 +40,10 @@ public class EntityDTOConverter {
         tradeEntry.setEntryComments(requestDTO.getEntryComments());
         tradeEntry.setExitComments(requestDTO.getExitComments());
         tradeEntry.setRemarks(requestDTO.getRemarks());
+    }
+
+    private static double getRewardRiskRatio(TradeEntryRequestDTO requestDTO) {
+        return Math.abs(requestDTO.getEntryPrice()- requestDTO.getT1())/(Math.abs(requestDTO.getEntryPrice()- requestDTO.getSL()))*100;
     }
 
     // Profit depends on position chosen
@@ -83,6 +86,8 @@ public class EntityDTOConverter {
     public static TradeEntryResponseDTO entityToDTO(TradeEntry entry){
         TradeEntryResponseDTO tradeEntryResponseDTO = new TradeEntryResponseDTO();
         tradeEntryResponseDTO.setId(entry.getId());
+        tradeEntryResponseDTO.setProduct(entry.getProduct());
+        tradeEntryResponseDTO.setPosition(entry.getPosition());
         tradeEntryResponseDTO.setTraderName(entry.getTraderName());
         tradeEntryResponseDTO.setCapital(entry.getCapital());
         tradeEntryResponseDTO.setSymbol(entry.getSymbol());
@@ -93,6 +98,7 @@ public class EntityDTOConverter {
         tradeEntryResponseDTO.setSL(entry.getSL());
         tradeEntryResponseDTO.setSLPercent(entry.getSLPercent());
         tradeEntryResponseDTO.setRiskPercent(entry.getRiskPercent());
+        tradeEntryResponseDTO.setRewardRiskRatio(entry.getRewardRiskRatio());
         tradeEntryResponseDTO.setT1(entry.getT1());
         tradeEntryResponseDTO.setT1Percent(entry.getT1Percent());
         tradeEntryResponseDTO.setT2(entry.getT2());
@@ -111,8 +117,8 @@ public class EntityDTOConverter {
         		.id(entry.getId())
         		.traderName(entry.getTraderName())
         		.capital(entry.getCapital())
-        		.position(Constants.POSITION.valueOf(entry.getPosition()))
-        		.product(Constants.PRODUCT.valueOf(entry.getProduct()))
+        		.position(entry.getPosition())
+        		.product(entry.getProduct())
         		.build();
         return preferenceResponseDTO;
     }

@@ -25,8 +25,8 @@ public class TradeEntryRequestDTO {
     @NotBlank
     private String symbol;
     // provision to override
-    private POSITION position;
-    private PRODUCT product;
+    private String position;
+    private String product;
     @NotNull
     private Integer quantity;
     @NotNull

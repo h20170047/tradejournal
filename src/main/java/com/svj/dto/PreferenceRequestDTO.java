@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Data
 @AllArgsConstructor
@@ -16,12 +17,12 @@ import javax.validation.constraints.NotBlank;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
 public class PreferenceRequestDTO {
-    @NotBlank
+    @NotNull
     private String traderName;
-    @NotBlank
+    @NotNull
     private Double capital;
-    @NotBlank
+    @NotNull
     private POSITION position;
-    @NotBlank
+    @NotNull
     private PRODUCT product;
 }

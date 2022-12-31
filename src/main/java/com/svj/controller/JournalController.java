@@ -3,10 +3,17 @@ package com.svj.controller;
 import com.svj.dto.ServiceResponse;
 import com.svj.dto.TradeEntryRequestDTO;
 import com.svj.dto.TradeEntryResponseDTO;
+import com.svj.entity.TradeStats;
 import com.svj.service.JournalService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -14,6 +21,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static com.svj.utilities.AppUtils.dateFormatter;
+import static com.svj.utilities.AppUtils.generateReport;
 import static com.svj.utilities.JsonParser.jsonToString;
 
 @RestController
@@ -22,10 +30,12 @@ import static com.svj.utilities.JsonParser.jsonToString;
 public class JournalController {
 
     private JournalService journalService;
+    private final String defaultInputFilePath;
 
     @Autowired
-    public JournalController(JournalService service){
+    public JournalController(JournalService service, @Value("${input.filePath}") String defaultInputFilePath){
         journalService = service;
+        this.defaultInputFilePath = defaultInputFilePath;
     }
 
     @PostMapping
@@ -35,6 +45,18 @@ public class JournalController {
         log.debug("JournalController: addEntry Response from service is {}", jsonToString(responseDTO));
         ServiceResponse response= new ServiceResponse(HttpStatus.CREATED, responseDTO, null);
         log.info("JournalController: addEntry Method returning with {} ", response);
+        return response;
+    }
+
+    @PostMapping("/bulk-add")
+    public ServiceResponse bulkAddEntries(@RequestParam(required = false) String filePath, @RequestParam(required = false, defaultValue = "Swaraj") String traderName){
+        if(filePath== null)
+            filePath= defaultInputFilePath;
+        log.info("JournalController: bulkAddEntries Starting method with payload {}", filePath);
+        List<TradeEntryResponseDTO> responseDTOS = journalService.bulkAddEntries(filePath, traderName);
+        log.debug("JournalController: bulkAddEntries Response from service is {}", jsonToString(responseDTOS));
+        ServiceResponse response= new ServiceResponse(HttpStatus.CREATED, responseDTOS, null);
+        log.info("JournalController: bulkAddEntries Method returning with {} ", response);
         return response;
     }
 
@@ -80,13 +102,19 @@ public class JournalController {
     }
 
     @GetMapping("/entries/{fromDate}/{toDate}")
-    public ServiceResponse getEntriesBetweenDates(@RequestParam String traderName,@PathVariable String fromDate, @PathVariable String toDate){
+    public ResponseEntity<Resource> getEntriesBetweenDates(@RequestParam String traderName, @PathVariable String fromDate, @PathVariable String toDate){
         log.info("JournalController: getEntriesBetweenDates for trader: {},  Starting method between dates- {}, {}", traderName, fromDate, toDate);
-        List<TradeEntryResponseDTO> allEntries = journalService.getEntriesBetweenDates(traderName, LocalDate.parse(fromDate,dateFormatter), LocalDate.parse(toDate,dateFormatter));
-        log.debug("JournalController: getEntriesBetweenDates Response from service is {}", jsonToString(allEntries));
-        ServiceResponse response= new ServiceResponse(HttpStatus.OK, allEntries, null);
-        log.info("JournalController: getEntriesBetweenDates Method returning with {}", response);
-        return response;
+        LocalDate from = LocalDate.parse(fromDate, dateFormatter);
+        LocalDate to = LocalDate.parse(toDate, dateFormatter);
+        List<TradeEntryResponseDTO> allEntries = journalService.getEntriesBetweenDates(traderName, from, to);
+        TradeStats tradeStats = journalService.computeStats(allEntries, from, to);
+        log.debug("JournalController: getEntriesBetweenDates Response from service is entries-{}, stats-{}", jsonToString(allEntries), jsonToString(tradeStats));
+        InputStreamResource file = new InputStreamResource(generateReport(allEntries, tradeStats));
+        log.info("JournalController: getEntriesBetweenDates Method returning with file");
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=REPORT_".concat(fromDate).concat("-").concat(toDate) + ".csv")
+                .contentType(MediaType.parseMediaType("application/csv"))
+                .body(file);
     }
 
     @GetMapping("/entries/report/week")

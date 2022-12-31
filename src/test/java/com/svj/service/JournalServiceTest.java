@@ -120,12 +120,11 @@ class JournalServiceTest {
     void getStats(){
         LocalDate fromDate = LocalDate.parse("1-03-2000", dateFormatter);
         LocalDate toDate = LocalDate.parse("12-03-2000", dateFormatter);
-        List<TradeEntry> entries= Arrays.asList(
-                TradeEntry.builder().id("id-1").symbol("SYM").traderName("TEST").quantity(10).entryDate(LocalDate.parse("12-03-2000", dateFormatter)).entryPrice(100.0).exitPrice(110.0).profit(10.0).profitPercent(2d).build(),
-                TradeEntry.builder().id("id-2").symbol("SYM").traderName("TEST").quantity(10).entryDate(LocalDate.parse("12-03-2000", dateFormatter)).entryPrice(95.0).exitPrice(85.0).profit(-10.0).profitPercent(-1d).build()
+        List<TradeEntryResponseDTO> entries= Arrays.asList(
+                TradeEntryResponseDTO.builder().id("id-1").symbol("SYM").traderName("TEST").quantity(10).entryDate(LocalDate.parse("12-03-2000", dateFormatter)).entryPrice(100.0).exitPrice(110.0).profit(10.0).profitPercent(2d).build(),
+                TradeEntryResponseDTO.builder().id("id-2").symbol("SYM").traderName("TEST").quantity(10).entryDate(LocalDate.parse("12-03-2000", dateFormatter)).entryPrice(95.0).exitPrice(85.0).profit(-10.0).profitPercent(-1d).build()
         );
-        when(repository.findEntriesByDate(any(String.class), any(LocalDate.class), any(LocalDate.class))).thenReturn(entries);
-        TradeStats tradeStats = service.computeStats("Test", fromDate, toDate);
+        TradeStats tradeStats = service.computeStats(entries, fromDate, toDate);
         assertThat(tradeStats.getTotalTrades()).isEqualTo(2);
     }
 }
