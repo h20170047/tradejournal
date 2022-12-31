@@ -37,7 +37,7 @@ public class StockScreenerController {
             @ApiResponse(responseCode ="400", description="Entered inputs are not valid"),
             @ApiResponse(responseCode ="500", description="Some error at server side")
     })
-    public ServiceResponse getTradeSetup(@PathVariable @DateTimeFormat(pattern="d-M-yyyy") LocalDate tradeDate, @RequestParam(defaultValue = "Swaraj") String traderName){ // TODO- traderName to be retrieved from jwt
+    public ServiceResponse getTradeSetup(@PathVariable @DateTimeFormat(pattern="d-M-yyyy") LocalDate tradeDate, @RequestParam(defaultValue = "Swaraj") String traderName){
         log.info("AnalysisController:getTradeSetup Received request with tradeDate= {}", tradeDate.toString());
         TradeSetupResponseDTO stocksList = service.getStocksList(tradeDate, traderName);
         ServiceResponse response = new ServiceResponse(HttpStatus.OK, stocksList, null);

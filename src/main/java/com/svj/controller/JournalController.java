@@ -80,20 +80,19 @@ public class JournalController {
     }
 
     @GetMapping("/entries/{fromDate}/{toDate}")
-    public ServiceResponse getEntriesBetweenDates(@PathVariable String fromDate, @PathVariable String toDate){
-        log.info("JournalController: getEntriesBetweenDates Starting method between dates- {}, {}", fromDate, toDate);
-        List<TradeEntryResponseDTO> allEntries = journalService.getEntriesBetweenDates(LocalDate.parse(fromDate,dateFormatter), LocalDate.parse(toDate,dateFormatter));
+    public ServiceResponse getEntriesBetweenDates(@RequestParam String traderName,@PathVariable String fromDate, @PathVariable String toDate){
+        log.info("JournalController: getEntriesBetweenDates for trader: {},  Starting method between dates- {}, {}", traderName, fromDate, toDate);
+        List<TradeEntryResponseDTO> allEntries = journalService.getEntriesBetweenDates(traderName, LocalDate.parse(fromDate,dateFormatter), LocalDate.parse(toDate,dateFormatter));
         log.debug("JournalController: getEntriesBetweenDates Response from service is {}", jsonToString(allEntries));
         ServiceResponse response= new ServiceResponse(HttpStatus.OK, allEntries, null);
         log.info("JournalController: getEntriesBetweenDates Method returning with {}", response);
         return response;
     }
 
-    // TODO- Get stats between 2 dates, weekly, monthly
     @GetMapping("/entries/report/week")
-    public ServiceResponse getEntriesForWeek(){
+    public ServiceResponse getEntriesForWeek(@RequestParam String traderName){
         log.info("JournalController: getEntriesForWeek Starting method for week {}", LocalDate.now());
-        List<TradeEntryResponseDTO> allEntries = journalService.getEntriesBetweenDates(LocalDate.parse(LocalDate.now().plusDays(-(7+2)).toString(),dateFormatter), LocalDate.parse(LocalDate.now().toString(),dateFormatter));
+        List<TradeEntryResponseDTO> allEntries = journalService.getEntriesBetweenDates(traderName, LocalDate.parse(LocalDate.now().plusDays(-(7+2)).toString(),dateFormatter), LocalDate.parse(LocalDate.now().toString(),dateFormatter));
         log.debug("JournalController: getEntriesForWeek Response from service is {}", jsonToString(allEntries));
         ServiceResponse response= new ServiceResponse(HttpStatus.OK, allEntries, null);
         log.info("JournalController: getEntriesForWeek Method returning with {}", response);
@@ -101,9 +100,9 @@ public class JournalController {
     }
 
     @GetMapping("/entries/report/month")
-    public ServiceResponse getEntriesForMonth(){
+    public ServiceResponse getEntriesForMonth(@RequestParam String traderName){
         log.info("JournalController: getEntriesForMonth Starting method for week {}", LocalDate.now());
-        List<TradeEntryResponseDTO> allEntries = journalService.getEntriesBetweenDates(LocalDate.parse(LocalDate.now().plusDays(-(30+(2*4))).toString(),dateFormatter), LocalDate.parse(LocalDate.now().toString(),dateFormatter));
+        List<TradeEntryResponseDTO> allEntries = journalService.getEntriesBetweenDates(traderName, LocalDate.parse(LocalDate.now().plusDays(-(30+(2*4))).toString(),dateFormatter), LocalDate.parse(LocalDate.now().toString(),dateFormatter));
         log.debug("JournalController: getEntriesForMonth Response from service is {}", jsonToString(allEntries));
         ServiceResponse response= new ServiceResponse(HttpStatus.OK, allEntries, null);
         log.info("JournalController: getEntriesForMonth Method returning with {}", response);

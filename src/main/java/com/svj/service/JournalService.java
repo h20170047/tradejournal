@@ -159,10 +159,10 @@ public class JournalService {
         }
     }
 
-    public List<TradeEntryResponseDTO> getEntriesBetweenDates(LocalDate fromDate, LocalDate toDate) {
+    public List<TradeEntryResponseDTO> getEntriesBetweenDates(String traderName, LocalDate fromDate, LocalDate toDate) {
         try{
             log.info("TradeService: getEntriesBetweenDates Starting method.");
-            List<TradeEntry> entries = journalRepository.findEntriesByDate(fromDate, toDate);
+            List<TradeEntry> entries = journalRepository.findEntriesByDate(traderName, fromDate, toDate);
             log.debug("TradeService: getEntriesBetweenDates Retrieved entries from db is {}", entries.toString());
             List<TradeEntryResponseDTO> response= StreamSupport.stream(entries.spliterator(), false)
                     .map(EntityDTOConverter:: entityToDTO)
@@ -175,9 +175,8 @@ public class JournalService {
         }
     }
 
-    //TODO- get stats of open trades too
-    public TradeStats computeStats(LocalDate fromDate, LocalDate toDate){
-        List<TradeEntryResponseDTO> entriesBetweenDates = getEntriesBetweenDates(fromDate, toDate);
+    public TradeStats computeStats(String traderName, LocalDate fromDate, LocalDate toDate){
+        List<TradeEntryResponseDTO> entriesBetweenDates = getEntriesBetweenDates(traderName, fromDate, toDate);
         TradeStats result= new TradeStats();
         result.setFromDate(fromDate); result.setToDate(toDate);
         int totalTrades= 0, lossCount= 0, openTradeCount= 0;
@@ -222,7 +221,7 @@ public class JournalService {
         }
         return result;
     }
-    // TODO- check journal entity is not having -ve %(SL, T1, T2) if they arent null
+
     public boolean arePercentsPostivie(TradeEntry entry){
         if(entry.getSLPercent()>0 && entry.getT1Percent()>0 && (entry.getT2()== null || (entry.getT2()!= null && entry.getT2Percent()> 0)))
             return true;

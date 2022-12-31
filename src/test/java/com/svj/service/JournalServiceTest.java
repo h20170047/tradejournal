@@ -111,8 +111,8 @@ class JournalServiceTest {
                 TradeEntry.builder().id("id-1").symbol("SYM").traderName("TEST").quantity(10).entryDate(LocalDate.parse("12-03-2000", dateFormatter)).build(),
                 TradeEntry.builder().id("id-2").symbol("SYM").traderName("TEST").quantity(10).entryDate(LocalDate.parse("12-03-2000", dateFormatter)).build()
         );
-        when(repository.findEntriesByDate(any(LocalDate.class), any(LocalDate.class))).thenReturn(entries);
-        List<TradeEntryResponseDTO> entriesByDate = service.getEntriesBetweenDates(tradeDay, tradeDay.plusDays(1));
+        when(repository.findEntriesByDate(any(String.class), any(LocalDate.class), any(LocalDate.class))).thenReturn(entries);
+        List<TradeEntryResponseDTO> entriesByDate = service.getEntriesBetweenDates("Test", tradeDay, tradeDay.plusDays(1));
         assertThat(entriesByDate.size()).isEqualTo(2);
     }
 
@@ -124,8 +124,8 @@ class JournalServiceTest {
                 TradeEntry.builder().id("id-1").symbol("SYM").traderName("TEST").quantity(10).entryDate(LocalDate.parse("12-03-2000", dateFormatter)).entryPrice(100.0).exitPrice(110.0).profit(10.0).profitPercent(2d).build(),
                 TradeEntry.builder().id("id-2").symbol("SYM").traderName("TEST").quantity(10).entryDate(LocalDate.parse("12-03-2000", dateFormatter)).entryPrice(95.0).exitPrice(85.0).profit(-10.0).profitPercent(-1d).build()
         );
-        when(repository.findEntriesByDate(any(LocalDate.class), any(LocalDate.class))).thenReturn(entries);
-        TradeStats tradeStats = service.computeStats(fromDate, toDate);
+        when(repository.findEntriesByDate(any(String.class), any(LocalDate.class), any(LocalDate.class))).thenReturn(entries);
+        TradeStats tradeStats = service.computeStats("Test", fromDate, toDate);
         assertThat(tradeStats.getTotalTrades()).isEqualTo(2);
     }
 }

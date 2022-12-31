@@ -4,9 +4,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.svj.dto.PreferenceResponseDTO;
 import com.svj.dto.ServiceResponse;
 import com.svj.dto.TradeEntryRequestDTO;
+import com.svj.dto.TradeEntryResponseDTO;
+import com.svj.entity.TradeEntry;
 import com.svj.entity.TraderPreference;
 import com.svj.repository.JournalRepository;
 import com.svj.repository.PreferenceRepository;
+import com.svj.utilities.Constants;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
@@ -15,6 +18,8 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
 import static com.svj.utilities.AppUtils.dateFormatter;
 import static com.svj.utilities.JsonParser.objectMapper;
@@ -64,8 +69,8 @@ public class TradeJournalIntegrationTests {
         ServiceResponse<PreferenceResponseDTO> preferenceServerResponse = restTemplate.getForObject(preferenceBaseUrl.concat("/name/{traderName}"), ServiceResponse.class,traderName);
         PreferenceResponseDTO preferenceResponse= objectMapper.convertValue(preferenceServerResponse.getResponse(), new TypeReference<PreferenceResponseDTO>(){});
         assertThat(preferenceResponse.getCapital()).isEqualTo(3010);
-
     }
+
     @Test
     public void incorrectInput(){
         // Add trade entry
@@ -74,5 +79,63 @@ public class TradeJournalIntegrationTests {
         // check if right validation happened
         assertTrue(String.valueOf(journalServerResponse.getErrors().get(0)).contains("quantity : must not be null"));
     }
-    // TODO- when blacklist doesnt exist for user, trade-setup should be returned without error
+
+    @Test
+    public void test_Stats_NumberOfInsancesAreCorrect(){
+        // setup
+        List<TradeEntry> entries= Arrays.asList(
+                TradeEntry.builder().traderName("Test").symbol("INFY").quantity(1).entryDate(LocalDate.parse("19-12-2022", dateFormatter)).exitDate(LocalDate.parse("19-12-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build(),
+                TradeEntry.builder().traderName("OtherTrader1").symbol("INFY").quantity(1).entryDate(LocalDate.parse("20-12-2022", dateFormatter)).exitDate(LocalDate.parse("20-12-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build(),
+                TradeEntry.builder().traderName("Test").symbol("INFY").quantity(1).entryDate(LocalDate.parse("21-12-2022", dateFormatter)).exitDate(LocalDate.parse("21-12-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build(),
+                TradeEntry.builder().traderName("Test").symbol("INFY").quantity(1).entryDate(LocalDate.parse("22-12-2022", dateFormatter)).exitDate(LocalDate.parse("22-12-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build(),
+                TradeEntry.builder().traderName("Test").symbol("INFY").quantity(1).entryDate(LocalDate.parse("19-12-2022", dateFormatter)).exitDate(LocalDate.parse("19-12-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build(),
+                TradeEntry.builder().traderName("OtherTrader2").symbol("INFY").quantity(1).entryDate(LocalDate.parse("19-12-2022", dateFormatter)).exitDate(LocalDate.parse("19-12-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build(),
+                TradeEntry.builder().traderName("Test").symbol("INFY").quantity(1).entryDate(LocalDate.parse("23-12-2022", dateFormatter)).exitDate(LocalDate.parse("23-12-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build()
+            );
+        journalRepo.saveAll(entries);
+        // check if number of entries is correct for trader within date range
+        ServiceResponse<List<TradeEntryResponseDTO>> journalServerResponse = restTemplate.getForObject(journalBaseUrl.concat("/entries/{fromDate}/{toDate}?traderName={traderName}"), ServiceResponse.class, "19-12-2022", "23-12-2022", "Test");
+        List<TradeEntryResponseDTO>  userEntries= objectMapper.convertValue(journalServerResponse.getResponse(), new TypeReference<List<TradeEntryResponseDTO>>(){});
+        assertThat(userEntries.size()).isEqualTo(5);
+    }
+
+    @Test
+    @Disabled
+    public void test_Stats_CorrectEntriesForMonth(){
+        // setup
+        List<TradeEntry> entries= Arrays.asList(
+                TradeEntry.builder().traderName("Test").symbol("INFY").quantity(1).entryDate(LocalDate.parse("19-10-2022", dateFormatter)).exitDate(LocalDate.parse("19-10-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build(),
+                TradeEntry.builder().traderName("OtherTrader1").symbol("INFY").quantity(1).entryDate(LocalDate.parse("20-12-2022", dateFormatter)).exitDate(LocalDate.parse("20-12-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build(),
+                TradeEntry.builder().traderName("Test").symbol("INFY").quantity(1).entryDate(LocalDate.parse("21-12-2022", dateFormatter)).exitDate(LocalDate.parse("21-12-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build(),
+                TradeEntry.builder().traderName("Test").symbol("INFY").quantity(1).entryDate(LocalDate.parse("22-12-2022", dateFormatter)).exitDate(LocalDate.parse("22-12-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build(),
+                TradeEntry.builder().traderName("Test").symbol("INFY").quantity(1).entryDate(LocalDate.parse("19-12-2022", dateFormatter)).exitDate(LocalDate.parse("19-12-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build(),
+                TradeEntry.builder().traderName("OtherTrader2").symbol("INFY").quantity(1).entryDate(LocalDate.parse("19-12-2022", dateFormatter)).exitDate(LocalDate.parse("19-12-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build(),
+                TradeEntry.builder().traderName("Test").symbol("INFY").quantity(1).entryDate(LocalDate.parse("23-12-2022", dateFormatter)).exitDate(LocalDate.parse("23-12-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build()
+        );
+        journalRepo.saveAll(entries);
+        // check if number of entries is correct for trader within date range
+        ServiceResponse<List<TradeEntryResponseDTO>> journalServerResponse = restTemplate.getForObject(journalBaseUrl.concat("/entries/{fromDate}/{toDate}?traderName={traderName}"), ServiceResponse.class, "19-12-2022", "23-12-2022", "Test");
+        List<TradeEntryResponseDTO>  userEntries= objectMapper.convertValue(journalServerResponse.getResponse(), new TypeReference<List<TradeEntryResponseDTO>>(){});
+        assertThat(userEntries.size()).isEqualTo(4);
+    }
+
+    @Test
+    @Disabled
+    public void test_Stats_CorrectEntriesForWeek(){
+        // setup
+        List<TradeEntry> entries= Arrays.asList(
+                TradeEntry.builder().traderName("Test").symbol("INFY").quantity(1).entryDate(LocalDate.parse("19-10-2022", dateFormatter)).exitDate(LocalDate.parse("19-10-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build(),
+                TradeEntry.builder().traderName("OtherTrader1").symbol("INFY").quantity(1).entryDate(LocalDate.parse("20-12-2022", dateFormatter)).exitDate(LocalDate.parse("20-12-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build(),
+                TradeEntry.builder().traderName("Test").symbol("INFY").quantity(1).entryDate(LocalDate.parse("16-12-2022", dateFormatter)).exitDate(LocalDate.parse("16-12-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build(),
+                TradeEntry.builder().traderName("Test").symbol("INFY").quantity(1).entryDate(LocalDate.parse("22-12-2022", dateFormatter)).exitDate(LocalDate.parse("22-12-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build(),
+                TradeEntry.builder().traderName("Test").symbol("INFY").quantity(1).entryDate(LocalDate.parse("19-12-2022", dateFormatter)).exitDate(LocalDate.parse("19-12-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build(),
+                TradeEntry.builder().traderName("OtherTrader2").symbol("INFY").quantity(1).entryDate(LocalDate.parse("19-12-2022", dateFormatter)).exitDate(LocalDate.parse("19-12-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build(),
+                TradeEntry.builder().traderName("Test").symbol("INFY").quantity(1).entryDate(LocalDate.parse("23-12-2022", dateFormatter)).exitDate(LocalDate.parse("23-12-2022", dateFormatter)).entryPrice(1000d).SL(990d).T1(1010d).build()
+        );
+        journalRepo.saveAll(entries);
+        // check if number of entries is correct for trader within date range
+        ServiceResponse<List<TradeEntryResponseDTO>> journalServerResponse = restTemplate.getForObject(journalBaseUrl.concat("/entries/{fromDate}/{toDate}?traderName={traderName}"), ServiceResponse.class, "19-12-2022", "23-12-2022", "Test");
+        List<TradeEntryResponseDTO>  userEntries= objectMapper.convertValue(journalServerResponse.getResponse(), new TypeReference<List<TradeEntryResponseDTO>>(){});
+        assertThat(userEntries.size()).isEqualTo(3);
+    }
 }

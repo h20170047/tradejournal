@@ -14,7 +14,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-// TODO- If T1, T2, Sl % are 0 or -ve return error
 public class TradeEntryResponseDTO {
     private String id;
     private String traderName;
