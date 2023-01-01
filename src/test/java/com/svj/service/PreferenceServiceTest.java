@@ -32,7 +32,7 @@ class PreferenceServiceTest {
     @BeforeEach
     void setUp() {
         requestDTO= PreferenceRequestDTO.builder()
-                .traderName("TEST").capital(1000.0).product(Constants.PRODUCT.valueOf("INTRADAY")).position(Constants.POSITION.valueOf("LONG"))
+                .traderName("TEST").capital(1000.0).product("INTRADAY").position("LONG")
                 .build();
         preference= TraderPreference.builder().id("ID").traderName("TEST").capital(1000.0).product("INTRADAY").position("LONG")
                 .build();

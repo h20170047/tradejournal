@@ -11,3 +11,8 @@ strategy:
 
 input:
     filePath: "InputData.csv"
+
+preference:
+    capital: 3000
+    position: LONG
+    product: INTRADAY

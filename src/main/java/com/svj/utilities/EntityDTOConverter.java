@@ -2,14 +2,14 @@ package com.svj.utilities;
 
 import com.svj.dto.PreferenceRequestDTO;
 import com.svj.dto.PreferenceResponseDTO;
-import com.svj.entity.TradeEntry;
 import com.svj.dto.TradeEntryRequestDTO;
 import com.svj.dto.TradeEntryResponseDTO;
+import com.svj.entity.TradeEntry;
 import com.svj.entity.TraderPreference;
 
 public class EntityDTOConverter {
 
-    public static TradeEntry convertDTOToEntity(TradeEntryRequestDTO requestDTO){
+    public static com.svj.entity.TradeEntry convertDTOToEntity(TradeEntryRequestDTO requestDTO){
         TradeEntry tradeEntry = new TradeEntry();
         copyReqToEntity(requestDTO, tradeEntry);
         return tradeEntry;
@@ -27,60 +27,67 @@ public class EntityDTOConverter {
         tradeEntry.setExitDate(requestDTO.getExitDate());
         tradeEntry.setEntryPrice(requestDTO.getEntryPrice());
         tradeEntry.setSL(requestDTO.getSL());
-        tradeEntry.setSLPercent(getSLPercent(requestDTO));
-        tradeEntry.setRiskPercent(getRiskPercent(requestDTO));
-        tradeEntry.setRewardRiskRatio(getRewardRiskRatio(requestDTO));
         tradeEntry.setT1(requestDTO.getT1());
-        tradeEntry.setT1Percent(getT1Percent(requestDTO));
         tradeEntry.setT2(requestDTO.getT2());
-        tradeEntry.setT2Percent(getT2Percent(requestDTO));
         tradeEntry.setExitPrice(requestDTO.getExitPrice());
-        tradeEntry.setProfit(calculateProfit(requestDTO));
-        tradeEntry.setProfitPercent(getProfitPercent(tradeEntry));
         tradeEntry.setEntryComments(requestDTO.getEntryComments());
         tradeEntry.setExitComments(requestDTO.getExitComments());
         tradeEntry.setRemarks(requestDTO.getRemarks());
+        computeDerivedValues(tradeEntry);
     }
 
-    private static double getRewardRiskRatio(TradeEntryRequestDTO requestDTO) {
-        return Math.abs(requestDTO.getEntryPrice()- requestDTO.getT1())/(Math.abs(requestDTO.getEntryPrice()- requestDTO.getSL()))*100;
+    protected static void computeDerivedValues(TradeEntry tradeEntry) {
+        tradeEntry.setSLPercent(getSLPercent(tradeEntry));
+        tradeEntry.setRiskPercent(getRiskPercent(tradeEntry));
+        if(tradeEntry.getRewardRiskRatio()== null)
+            tradeEntry.setRewardRiskRatio(getRewardRiskRatio(tradeEntry));
+        tradeEntry.setT1Percent(getT1Percent(tradeEntry));
+        tradeEntry.setT2Percent(getT2Percent(tradeEntry));
+        if(tradeEntry.getProfit()== null)
+            tradeEntry.setProfit(calculateProfit(tradeEntry));
+        if(tradeEntry.getProfitPercent()== null)
+            tradeEntry.setProfitPercent(getProfitPercent(tradeEntry));
+    }
+
+    private static double getRewardRiskRatio(com.svj.entity.TradeEntry tradeEntry) {
+        return Math.abs(tradeEntry.getEntryPrice()- tradeEntry.getT1())/(Math.abs(tradeEntry.getEntryPrice()- tradeEntry.getSL()));
     }
 
     // Profit depends on position chosen
-    private static Double calculateProfit(TradeEntryRequestDTO requestDTO) {
-        if(requestDTO.getExitPrice()!= null){
-            if("LONG".equals(requestDTO.getPosition().toString()))
-                return requestDTO.getExitPrice()- requestDTO.getEntryPrice();
+    private static Double calculateProfit(TradeEntry tradeEntry) {
+        if(tradeEntry.getExitPrice()!= null){
+            if("LONG".equals(tradeEntry.getPosition()))
+                return tradeEntry.getExitPrice()- tradeEntry.getEntryPrice();
             else
-                return requestDTO.getEntryPrice()- requestDTO.getExitPrice();
+                return tradeEntry.getEntryPrice()- tradeEntry.getExitPrice();
         }
         return null;
     }
 
-    private static Double getProfitPercent(TradeEntry requestDTO) {
-        if(requestDTO.getProfit()!= null){
-            return requestDTO.getProfit()/requestDTO.getEntryPrice()*100;
+    private static Double getProfitPercent(TradeEntry tradeEntry) {
+        if(tradeEntry.getProfit()!= null){
+            return tradeEntry.getProfit()/tradeEntry.getCapital()*100;
         }
         return null;
     }
 
-    private static Double getT2Percent(TradeEntryRequestDTO requestDTO) {
-        if(requestDTO.getT2()== null)
+    private static Double getT2Percent(TradeEntry tradeEntry) {
+        if(tradeEntry.getT2()== null)
             return null;
         else
-            return Math.abs(requestDTO.getT2()-requestDTO.getT1())/requestDTO.getT1()*100;
+            return Math.abs(tradeEntry.getT2()-tradeEntry.getT1())/tradeEntry.getT1()*100;
     }
 
-    private static double getT1Percent(TradeEntryRequestDTO requestDTO) {
-        return Math.abs(requestDTO.getT1()- requestDTO.getEntryPrice())/requestDTO.getEntryPrice() *100;
+    private static double getT1Percent(TradeEntry tradeEntry) {
+        return Math.abs(tradeEntry.getT1()- tradeEntry.getEntryPrice())/tradeEntry.getEntryPrice() *100;
     }
 
-    private static double getRiskPercent(TradeEntryRequestDTO requestDTO) {
-        return 100*requestDTO.getQuantity()*Math.abs(requestDTO.getSL()-requestDTO.getEntryPrice())/requestDTO.getCapital();
+    private static double getRiskPercent(TradeEntry tradeEntry) {
+        return 100*tradeEntry.getQuantity()*Math.abs(tradeEntry.getSL()-tradeEntry.getEntryPrice())/tradeEntry.getCapital();
     }
 
-    private static double getSLPercent(TradeEntryRequestDTO requestDTO) {
-        return Math.abs(requestDTO.getSL()- requestDTO.getEntryPrice())/requestDTO.getEntryPrice() *100;
+    private static double getSLPercent(TradeEntry tradeEntry) {
+        return Math.abs(tradeEntry.getSL()- tradeEntry.getEntryPrice())/tradeEntry.getEntryPrice() *100;
     }
 
     public static TradeEntryResponseDTO entityToDTO(TradeEntry entry){

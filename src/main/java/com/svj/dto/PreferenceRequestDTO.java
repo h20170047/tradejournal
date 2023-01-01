@@ -22,7 +22,7 @@ public class PreferenceRequestDTO {
     @NotNull
     private Double capital;
     @NotNull
-    private POSITION position;
+    private String position;
     @NotNull
-    private PRODUCT product;
+    private String product;
 }

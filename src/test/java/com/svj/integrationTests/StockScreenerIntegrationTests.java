@@ -1,12 +1,9 @@
 package com.svj.integrationTests;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.svj.dto.PreferenceResponseDTO;
 import com.svj.dto.ServiceResponse;
-import com.svj.dto.TradeEntryRequestDTO;
 import com.svj.dto.TradeSetupResponseDTO;
 import com.svj.entity.BlackList;
-import com.svj.entity.TraderPreference;
 import com.svj.repository.BlackListRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,11 +15,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import static com.svj.utilities.AppUtils.dateFormatter;
 import static com.svj.utilities.JsonParser.objectMapper;
 import static org.assertj.core.api.Assertions.assertThat;
 

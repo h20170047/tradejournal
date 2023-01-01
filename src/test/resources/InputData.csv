@@ -26,8 +26,7 @@ Sl No ,Date,Stock,LONG/SHORT,QTY,Entry Price,Exit Price,SL,T1,Reward:Risk,Entry 
 7,26/12/22,BAJAJ-AUTO,LONG,2,3568.25,3548.8,3548.8,3583,0.66,,-38.8999999999996,-1.29666666666665,SL Hit,RSI not <40,5000
 8,26/12/22,BAJFINANCE,SHORT,2,6422.65,6466.6,6466.6,6387.15,1.34,Candle,-87.9000000000015,-2.93000000000005,SL Hit,Single candle with huge volume breaking RSI 60,5000
 9,26/12/22,GRASIM,SHORT,7,1733.5,1727.7,174.25,1715.95,2.26,,40.5999999999997,1.35333333333332,Time out,RSI changer’s vol was not high,5000
-10,26/12/22,EICHERMOT,SHORT,1,3190.1,3153.95,3239.3,3144.1,0.97,"heavy vol in sell
-200EMA broken",36.1500000000001,1.205,T hit,,5000
+10,26/12/22,EICHERMOT,SHORT,1,3190.1,3153.95,3239.3,3144.1,0.97,heavy vol in sell. 200EMA broken,36.1500000000001,1.205,T hit,,5000
 11,26/12/22,M&M,SHORT,17,1244.9,1238.85,1248.25,1238.85,1.81,Huge sell vol. Didnt cross 60RSI,102.850000000003,3.42833333333344,T hit,RSI not <60,5000
 12,26/12/22,TATAMOTORS,SHORT,9,384.6,385.05,390.8,380.5,0.66,RSI<40 good vol,-4.0499999999999,-0.134999999999997,Time out,,5000
 13,26/12/22,ADANIENT,SHORT,1,3705.95,3713,3750.25,3666.4,0.89,,-7.05000000000018,-0.235000000000006,Time out,,5000
@@ -94,8 +93,7 @@ Sl No ,Date,Stock,LONG/SHORT,QTY,Entry Price,Exit Price,SL,T1,Reward:Risk,Entry 
 13,27/12/22,ONGC,LONG,86,144,144.5,142.45,144.5,0.322580645161288,Open Drive. confirmed with Vol RSI,43,0.86,,Need to confirm with sector,5000
 14,29/12/22,HEROMOTOCO,SHORT,3,2677.5,2702,2708.85,2661.95,0.496012759170661,RSI<40 Sector support Volume at retest high. but didnt break-out yet. Early entry,-73.5,-1.47,,Volume at break-out was low. Wrong exit point. StopLoss hit at market price. Need to set with trigger price using SL,5000
 ,,,,,,,,,,,,,,,
-1,28/12/22,ONGC,LONG,86,143.8,143.85,142.65,145.25,1.26,"Steal. RSI Vol proved at earlier point. Sector support. 
-200EMA acts as support",4.29999999999853,0.085999999999971,Reversal from CPR,Vol was dec while breaking CPR,5000
+1,28/12/22,ONGC,LONG,86,143.8,143.85,142.65,145.25,1.26,Steal. RSI Vol proved at earlier point. Sector support. 200EMA acts as support,4.29999999999853,0.085999999999971,Reversal from CPR,Vol was dec while breaking CPR,5000
 2,28/12/22,TITAN,LONG,3,2588.75,2573,2555.9,2606,0.53,Sector vol RSI,-47.25,-0.945,Time out,view was correct but moved sideways after the last pivot point,5000
 3,28/12/22,INDUSINDBK,LONG,3,1223.2,1211,1194.55,1237.05,0.49,Sector vol RSI,-36.6000000000001,-0.732000000000003,Reversed with eve star at pivot,break out with good vol. Followed by bearish candles with higher vol,5000
 4,28/12/22,BAJAJ-AUTO,LONG,3,3581.05,3598.05,3548.35,3598.05,0.52,Sector vol RSI,51,1.02,,Trade within CPR but with prev proven points and EMA CPR support. Vol inc on rejection from CPR. No break-out with good vol or RSI,5000
@@ -115,26 +113,15 @@ Sl No ,Date,Stock,LONG/SHORT,QTY,Entry Price,Exit Price,SL,T1,Reward:Risk,Entry 
 12,29/12/22,NESTLEIND,SHORT,1,19752.8,19633.3,19845.95,19633.3,1.28,Secor Vol,119.5,2.39,T hit,prev proven point. Target approved by FRT. Very good entry. Reversing from 100 EMA,5000
 ,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,
-1,30/12/22,TITAN,LONG,7,2589.95,2607.15,2576.55,2607.15,1.28,"RSI Sector Vol high in breakout
-Vol not above avg",120.400000000002,2.40800000000004,T hit,Wait for price to move. most likely it goes down before rallying up. Fib retracement tool showed price for last pull back was around the entry point. should have waited for confirmation with good volume. Round figure 2600 is a big resistance,5000
+1,30/12/22,TITAN,LONG,7,2589.95,2607.15,2576.55,2607.15,1.28,RSI Sector Vol high in breakout. Vol not above avg,120.400000000002,2.40800000000004,T hit,Wait for price to move. most likely it goes down before rallying up. Fib retracement tool showed price for last pull back was around the entry point. should have waited for confirmation with good volume. Round figure 2600 is a big resistance,5000
 2,30/12/22,ONGC,LONG,90,146.7,147.25,145.6,147.25,0.5,RSI sector Vol> prev,49.500000000001,0.99000000000002,T hit,Volume not above avg,5000
 3,30/12/22,BAJAJFINSV,LONG,5,1542.4,1564.85,1525.15,1564.85,1.3,RSI Sector Vol high in breakout,112.249999999999,2.24499999999998,T hit,Vol not above avg. declining volume,5000
 4,30/12/22,TATASTEEL,LONG,58,114.35,112.65,112.65,115.5,0.68,RSI Sector Vol high in breakout,-98.5999999999993,-1.97199999999999,SL hit,Tried breaking that pivot 3 times. 1Nd and 3rd time vol was high. but not above avg,5000
-5,30/12/22,BRITANNIA,SHORT,2,4355.5,4317.3,4371.95,4317.3,0.5,"Broke CPR with good vol
-RSI<40
-Sector neutral",76.3999999999996,1.52799999999999,T hit,Experiment. Good exit point,5000
-6,30/12/22,HINDUNILVR,SHORT,8,2573.15,2561,2585.2,2547.85,2.1,"High vol sells breaking 200EMA
-RSI not supporting sector neutral",97.2000000000007,1.94400000000001,Time out,Experiment. Should have set exit before CPR. on correction T1 will be reached.,5000
-7,30/12/22,GRASIM,SHORT,7,1758.85,1730.35,1772.7,1730.35,2.06,"High vol sells over avg vol with bearish large pin
-RSI sector didnt support",199.5,3.99,T hit,Experiment. Exit should be next imp point (Passed CPR- T1 on correction),5000
-8,30/12/22,JSWSTEEL,LONG,6,775.25,768,759.2,783.15,0.49,"RSI>60
-high vol break-out of day's high
-CPR EMA support below",-43.5,-0.87,Time out,Following bearish candle also had above avg vol,5000
-9,30/12/22,NESTLEIND,SHORT,1,19752.8,19642.65,19899.25,19642.65,1.67,"Super volume sell breaking 200EMA
-RSI not supporting
-Sector neutral
-",110.149999999998,2.20299999999996,T hit,Experiment. Target is set near day’s low. Should have kept T1 before CPR. checked and moved SL (would have reached T1 on correction. reached next pivot point too),5000
-10,30/12/22,LT,SHORT,16,2106.85,2100.45,2111.1,2100.45,0.78,"RSI<40 good selling pressure with vol breaking CPR
-Sector same as stock",102.400000000001,2.04800000000003,T hit,,5000
+5,30/12/22,BRITANNIA,SHORT,2,4355.5,4317.3,4371.95,4317.3,0.5,Broke CPR with good vol. RSI<40. Sector neutral,76.3999999999996,1.52799999999999,T hit,Experiment. Good exit point,5000
+6,30/12/22,HINDUNILVR,SHORT,8,2573.15,2561,2585.2,2547.85,2.1,High vol sells breaking 200EMA. RSI not supporting sector neutral,97.2000000000007,1.94400000000001,Time out,Experiment. Should have set exit before CPR. on correction T1 will be reached.,5000
+7,30/12/22,GRASIM,SHORT,7,1758.85,1730.35,1772.7,1730.35,2.06,High vol sells over avg vol with bearish large pin. RSI sector didnt support,199.5,3.99,T hit,Experiment. Exit should be next imp point (Passed CPR- T1 on correction),5000
+8,30/12/22,JSWSTEEL,LONG,6,775.25,768,759.2,783.15,0.49,RSI>60. high vol break-out of day's high. CPR EMA support below,-43.5,-0.87,Time out,Following bearish candle also had above avg vol,5000
+9,30/12/22,NESTLEIND,SHORT,1,19803.05,19642.65,19899.25,19642.65,1.67,Super volume sell breaking 200EMA. RSI not supporting. Sector neutral,160.399999999998,3.20799999999996,T hit,Experiment. Target is set near dayï¿½s low. Should have kept T1 before CPR. checked and moved SL (would have reached T1 on correction. reached next pivot point too),5000
+10,30/12/22,LT,SHORT,16,2106.85,2100.45,2111.1,2100.45,0.78,RSI<40 good selling pressure with vol breaking CPR. Sector same as stock,102.400000000001,2.04800000000003,T hit,,5000
 11,30/12/22,POWERGRID,SHORT,117,214.75,214.15,215.6,214.15,0.71,RSI<40 good selling pressure with vol,70.1999999999993,1.40399999999999,T hit,Good above avg volume action,5000
-12,30/12/22,ITC,SHORT,86,333.45,332.7,334.95,332.7,0.5,RSI<40 good selling pressure with vol Sector support,64.5,1.29,T hit,A big seller’s presence shown in earlier candles,5000
+12,30/12/22,ITC,SHORT,86,333.45,332.7,334.95,332.7,0.5,RSI<40 good selling pressure with vol Sector support,64.5,1.29,T hit,A big sellers presence shown in earlier candles,5000

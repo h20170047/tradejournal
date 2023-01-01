@@ -3,6 +3,7 @@ package com.svj.controller;
 import com.svj.dto.ServiceResponse;
 import com.svj.dto.TradeEntryRequestDTO;
 import com.svj.dto.TradeEntryResponseDTO;
+import com.svj.entity.TradeEntry;
 import com.svj.entity.TradeStats;
 import com.svj.service.JournalService;
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +21,7 @@ import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 
-import static com.svj.utilities.AppUtils.dateFormatter;
-import static com.svj.utilities.AppUtils.generateReport;
+import static com.svj.utilities.AppUtils.*;
 import static com.svj.utilities.JsonParser.jsonToString;
 
 @RestController
@@ -102,7 +102,7 @@ public class JournalController {
     }
 
     @GetMapping("/entries/{fromDate}/{toDate}")
-    public ResponseEntity<Resource> getEntriesBetweenDates(@RequestParam String traderName, @PathVariable String fromDate, @PathVariable String toDate){
+    public ResponseEntity<Resource> getEntriesBetweenDates(@RequestParam(required = false, defaultValue = "Swaraj") String traderName, @PathVariable String fromDate, @PathVariable String toDate){
         log.info("JournalController: getEntriesBetweenDates for trader: {},  Starting method between dates- {}, {}", traderName, fromDate, toDate);
         LocalDate from = LocalDate.parse(fromDate, dateFormatter);
         LocalDate to = LocalDate.parse(toDate, dateFormatter);
@@ -118,22 +118,30 @@ public class JournalController {
     }
 
     @GetMapping("/entries/report/week")
-    public ServiceResponse getEntriesForWeek(@RequestParam String traderName){
+    public ResponseEntity<Resource> getEntriesForWeek(@RequestParam(required = false, defaultValue = "Swaraj") String traderName){
         log.info("JournalController: getEntriesForWeek Starting method for week {}", LocalDate.now());
-        List<TradeEntryResponseDTO> allEntries = journalService.getEntriesBetweenDates(traderName, LocalDate.parse(LocalDate.now().plusDays(-(7+2)).toString(),dateFormatter), LocalDate.parse(LocalDate.now().toString(),dateFormatter));
-        log.debug("JournalController: getEntriesForWeek Response from service is {}", jsonToString(allEntries));
-        ServiceResponse response= new ServiceResponse(HttpStatus.OK, allEntries, null);
-        log.info("JournalController: getEntriesForWeek Method returning with {}", response);
-        return response;
+        List<TradeEntryResponseDTO> allEntries = journalService.getEntriesBetweenDates(traderName, LocalDate.parse(LocalDate.now().plusDays(-(7)).toString(),dateFormatter3), LocalDate.parse(LocalDate.now().toString(),dateFormatter3));
+        TradeStats tradeStats = journalService.computeStats(allEntries, LocalDate.parse(LocalDate.now().plusDays(-(7+2)).toString(),dateFormatter3), LocalDate.parse(LocalDate.now().toString(),dateFormatter3));
+        log.debug("JournalController: getEntriesForWeek Response from service is entries-{}, stats-{}", jsonToString(allEntries), jsonToString(tradeStats));
+        InputStreamResource file = new InputStreamResource(generateReport(allEntries, tradeStats));
+        log.info("JournalController: getEntriesForWeek Method returning with file");
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=REPORT_WEEKLY".concat(LocalDate.parse(LocalDate.now().plusDays(-(7)).toString(),dateFormatter3).toString()) + ".csv")
+                .contentType(MediaType.parseMediaType("application/csv"))
+                .body(file);
     }
 
     @GetMapping("/entries/report/month")
-    public ServiceResponse getEntriesForMonth(@RequestParam String traderName){
+    public ResponseEntity<Resource> getEntriesForMonth(@RequestParam(required = false, defaultValue = "Swaraj") String traderName){
         log.info("JournalController: getEntriesForMonth Starting method for week {}", LocalDate.now());
-        List<TradeEntryResponseDTO> allEntries = journalService.getEntriesBetweenDates(traderName, LocalDate.parse(LocalDate.now().plusDays(-(30+(2*4))).toString(),dateFormatter), LocalDate.parse(LocalDate.now().toString(),dateFormatter));
-        log.debug("JournalController: getEntriesForMonth Response from service is {}", jsonToString(allEntries));
-        ServiceResponse response= new ServiceResponse(HttpStatus.OK, allEntries, null);
-        log.info("JournalController: getEntriesForMonth Method returning with {}", response);
-        return response;
+        List<TradeEntryResponseDTO> allEntries = journalService.getEntriesBetweenDates(traderName, LocalDate.parse(LocalDate.now().plusDays(-(30)).toString(),dateFormatter3), LocalDate.parse(LocalDate.now().toString(),dateFormatter3));
+        TradeStats tradeStats = journalService.computeStats(allEntries, LocalDate.parse(LocalDate.now().plusDays(-(7+2)).toString(),dateFormatter3), LocalDate.parse(LocalDate.now().toString(),dateFormatter3));
+        log.debug("JournalController: getEntriesForWeek Response from service is entries-{}, stats-{}", jsonToString(allEntries), jsonToString(tradeStats));
+        InputStreamResource file = new InputStreamResource(generateReport(allEntries, tradeStats));
+        log.info("JournalController: getEntriesForWeek Method returning with file");
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=REPORT_MONTHLY".concat(LocalDate.parse(LocalDate.now().plusDays(-(30)).toString(),dateFormatter3).toString()) + ".csv")
+                .contentType(MediaType.parseMediaType("application/csv"))
+                .body(file);
     }
 }

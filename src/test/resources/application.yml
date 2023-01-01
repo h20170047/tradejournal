@@ -8,3 +8,12 @@ nse:
 
 strategy:
     countOfCandlesConsidered: 3
+
+input:
+    filePath: "InputData.csv"
+
+
+preference:
+    capital: 3000
+    product: INTRADAY
+    position: LONG

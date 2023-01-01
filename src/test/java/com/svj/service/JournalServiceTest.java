@@ -33,6 +33,8 @@ class JournalServiceTest {
     private JournalService service;
     @Mock
     private JournalRepository repository;
+    @InjectMocks
+    private PreferenceService preferenceService;
     @Mock
     private PreferenceRepository preferenceRepository;
     @InjectMocks
@@ -42,16 +44,16 @@ class JournalServiceTest {
 
 
     TradeEntryRequestDTO requestDTO;
-    TradeEntry tradeEntry;
+    com.svj.entity.TradeEntry tradeEntry;
     TraderPreference preference;
 
     @BeforeEach
     public void setup(){
-        service= new JournalService(repository, preferenceRepository, blackListService);
+        service= new JournalService(repository, preferenceService, blackListService);
         requestDTO= TradeEntryRequestDTO.builder()
                 .symbol("SYM").traderName("TEST").quantity(10).entryDate(LocalDate.parse("12-03-2000", dateFormatter))
                 .entryPrice(100.0).SL(90.0).T1(110.0).build();
-        tradeEntry= TradeEntry.builder()
+        tradeEntry= com.svj.entity.TradeEntry.builder()
                 .symbol("SYM").id("ID").traderName("TEST").quantity(10)
                 .entryDate(LocalDate.parse("12-03-2000", dateFormatter))
                         .entryPrice(100.0).SL(90.0).T1(110.0).build();
@@ -61,7 +63,7 @@ class JournalServiceTest {
 
     @Test
     void addEntry() {
-        when(repository.save(any(TradeEntry.class))).thenReturn(tradeEntry);
+        when(repository.save(any(com.svj.entity.TradeEntry.class))).thenReturn(tradeEntry);
         when(preferenceRepository.findByTraderName(any(String.class))).thenReturn(preference);
         TradeEntryResponseDTO tradeEntryResponseDTO = service.addEntry(requestDTO);
         assertThat(tradeEntryResponseDTO.getId()).isNotEmpty();
@@ -69,7 +71,7 @@ class JournalServiceTest {
 
     @Test
     void updateEntry() {
-        when(repository.save(any(TradeEntry.class))).thenReturn(tradeEntry);
+        when(repository.save(any(com.svj.entity.TradeEntry.class))).thenReturn(tradeEntry);
         when(repository.findById(any(String.class))).thenReturn(Optional.of(tradeEntry));
         when(preferenceRepository.findByTraderName(any(String.class))).thenReturn(preference);
         TradeEntryResponseDTO responseDTO = service.updateEntry("id", requestDTO);
@@ -85,9 +87,9 @@ class JournalServiceTest {
 
     @Test
     void getAllEntries() {
-        List<TradeEntry> entities= Arrays.asList(
-                TradeEntry.builder().id("id-1").traderName("TEST").quantity(10).symbol("SYM").entryDate(LocalDate.parse("12-03-2000", dateFormatter)).build(),
-                TradeEntry.builder().id("id-2").traderName("TEST").quantity(10).symbol("SYM").entryDate(LocalDate.parse("12-03-2000", dateFormatter)).build()
+        List<com.svj.entity.TradeEntry> entities= Arrays.asList(
+                com.svj.entity.TradeEntry.builder().id("id-1").traderName("TEST").quantity(10).symbol("SYM").entryDate(LocalDate.parse("12-03-2000", dateFormatter)).build(),
+                com.svj.entity.TradeEntry.builder().id("id-2").traderName("TEST").quantity(10).symbol("SYM").entryDate(LocalDate.parse("12-03-2000", dateFormatter)).build()
         );
         when(repository.findAll()).thenReturn(entities);
         List<TradeEntryResponseDTO> entries = service.getAllEntries();
@@ -107,9 +109,9 @@ class JournalServiceTest {
     @Test
     void getEntriesBetweenDate() {
         LocalDate tradeDay = LocalDate.parse("12-03-2000", dateFormatter);
-        List<TradeEntry> entries= Arrays.asList(
-                TradeEntry.builder().id("id-1").symbol("SYM").traderName("TEST").quantity(10).entryDate(LocalDate.parse("12-03-2000", dateFormatter)).build(),
-                TradeEntry.builder().id("id-2").symbol("SYM").traderName("TEST").quantity(10).entryDate(LocalDate.parse("12-03-2000", dateFormatter)).build()
+        List<com.svj.entity.TradeEntry> entries= Arrays.asList(
+                com.svj.entity.TradeEntry.builder().id("id-1").symbol("SYM").traderName("TEST").quantity(10).entryDate(LocalDate.parse("12-03-2000", dateFormatter)).build(),
+                com.svj.entity.TradeEntry.builder().id("id-2").symbol("SYM").traderName("TEST").quantity(10).entryDate(LocalDate.parse("12-03-2000", dateFormatter)).build()
         );
         when(repository.findEntriesByDate(any(String.class), any(LocalDate.class), any(LocalDate.class))).thenReturn(entries);
         List<TradeEntryResponseDTO> entriesByDate = service.getEntriesBetweenDates("Test", tradeDay, tradeDay.plusDays(1));

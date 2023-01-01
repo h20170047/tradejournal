@@ -8,6 +8,7 @@ import com.svj.repository.PreferenceRepository;
 import com.svj.utilities.EntityDTOConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +21,13 @@ import static com.svj.utilities.EntityDTOConverter.*;
 @Slf4j
 public class PreferenceService {
     private PreferenceRepository preferenceRepository;
+
+    @Value("${preference.capital}")
+    private double capital;
+    @Value("${preference.position}")
+    private String position;
+    @Value("${preference.product}")
+    private String product;
 
     @Autowired
     public PreferenceService(PreferenceRepository preferenceRepository){
@@ -100,6 +108,8 @@ public class PreferenceService {
         try{
             log.info("PreferenceService: getEntriesByName Starting method.");
             TraderPreference preference = preferenceRepository.findByTraderName(name);
+            if(preference== null)
+                preference= preferenceRepository.save(TraderPreference.builder().traderName(name).capital(capital).position(position).product(product).build());
             log.debug("PreferenceService: getEntriesByName Retrieved entries from db is {}", preference.toString());
             log.info("PreferenceService: getEntriesByName method ended.");
             return entityToDTO(preference);
@@ -108,4 +118,5 @@ public class PreferenceService {
             throw new TradeProcessException(ex.getMessage());
         }
     }
+
 }

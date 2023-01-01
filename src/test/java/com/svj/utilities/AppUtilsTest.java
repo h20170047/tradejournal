@@ -1,6 +1,6 @@
 package com.svj.utilities;
 
-import com.svj.dto.TradeEntryRequestDTO;
+import com.svj.entity.TradeEntry;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -26,7 +26,7 @@ class AppUtilsTest {
 
     @Test
     void readJournalEntriesFromFile() {
-        List<TradeEntryRequestDTO> tradeEntries = appUtils.readJournalEntriesFromFile("InputData.csv", "Swaraj");
+        List<TradeEntry> tradeEntries = appUtils.readJournalEntriesFromFile("InputData.csv", "Swaraj");
         assertThat(tradeEntries).isNotNull();
     }
 }

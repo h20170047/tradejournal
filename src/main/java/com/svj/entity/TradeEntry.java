@@ -1,6 +1,5 @@
 package com.svj.entity;
 
-import com.svj.utilities.Constants;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.validation.constraints.NotBlank;
 import java.time.LocalDate;
 
 @Data
@@ -32,7 +30,7 @@ public class TradeEntry {
     private Double SL;
     private double SLPercent;
     private double riskPercent; // if capital is not provided, assume 3K or take from absolute
-    private double rewardRiskRatio;
+    private Double rewardRiskRatio;
     private Double T1;
     private double T1Percent;
     private Double T2;
