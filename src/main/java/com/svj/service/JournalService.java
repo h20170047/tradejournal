@@ -199,10 +199,10 @@ public class JournalService {
                 if(journal.getProfit()> 0){
                     // if profit, add corresponding elements to stats and for loss too
                     winCount++;
-                    successComments.add(String.format("Entry: %s || Exit: %s",journal.getEntryComments(),journal.getExitComments()));
+                    successComments.add(String.format("Position: %s || Entry: %s || Exit: %s || Remarks: %s",journal.getPosition(), journal.getEntryComments(),journal.getExitComments(), journal.getRemarks()));
                 }else{
                     lossCount++;
-                    cautionComments.add(String.format("Entry: %s || Exit: %s",journal.getEntryComments(),journal.getExitComments()));
+                    cautionComments.add(String.format("Position: %s || Entry: %s || Exit: %s || Remarks: %s",journal.getPosition(), journal.getEntryComments(),journal.getExitComments(), journal.getRemarks()));
                 }
                 totalCapitalGain+= journal.getProfitPercent();
             }else{
